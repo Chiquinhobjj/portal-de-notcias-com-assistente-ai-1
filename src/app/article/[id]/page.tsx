@@ -171,6 +171,41 @@ const sponsoredAds = [
   }
 ];
 
+// Header banner ads
+const headerAds = [
+  {
+    id: "header-ad-1",
+    title: "Black Friday Tech: Até 70% OFF",
+    description: "Notebooks, smartphones e gadgets com descontos imperdíveis. Aproveite agora!",
+    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=300&fit=crop",
+    cta: "Ver Ofertas",
+    link: "#",
+    gradient: "from-red-500 to-orange-500"
+  }
+];
+
+// Sidebar ads
+const sidebarAds = [
+  {
+    id: "sidebar-ad-1",
+    title: "Aprenda Python em 30 dias",
+    description: "Curso online completo com certificado. Comece hoje mesmo!",
+    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop",
+    cta: "Começar Grátis",
+    link: "#",
+    gradient: "from-indigo-500 to-purple-500"
+  },
+  {
+    id: "sidebar-ad-2",
+    title: "VPN Premium - 50% OFF",
+    description: "Navegue com segurança e privacidade. Oferta limitada!",
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=400&h=300&fit=crop",
+    cta: "Assinar Agora",
+    link: "#",
+    gradient: "from-cyan-500 to-blue-500"
+  }
+];
+
 export default async function ArticlePage({
   params,
 }: {
@@ -255,6 +290,41 @@ export default async function ArticlePage({
           </Button>
         </Link>
 
+        {/* Header Banner Ad */}
+        <Card className="mb-8 overflow-hidden border-2 border-yellow-500/20 bg-gradient-to-r from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/20 dark:to-amber-950/20">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
+              <Sparkles className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+              <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-500 uppercase tracking-wide">
+                Publicidade
+              </span>
+            </div>
+            <div className="grid md:grid-cols-[300px_1fr] gap-4 p-4">
+              <div className="relative h-32 md:h-40 rounded-lg overflow-hidden">
+                <Image
+                  src={headerAds[0].image}
+                  alt={headerAds[0].title}
+                  fill
+                  className="object-cover"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${headerAds[0].gradient} opacity-20`} />
+              </div>
+              <div className="flex flex-col justify-center gap-3">
+                <h3 className="font-bold text-2xl">{headerAds[0].title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {headerAds[0].description}
+                </p>
+                <Button 
+                  className={`w-fit bg-gradient-to-r ${headerAds[0].gradient} text-white hover:opacity-90`}
+                >
+                  {headerAds[0].cta}
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid lg:grid-cols-[1fr_320px] gap-8">
           {/* Main Content */}
           <article className="max-w-3xl">
@@ -328,12 +398,46 @@ export default async function ArticlePage({
             </div>
           </article>
 
-          {/* Sidebar - Descubra mais */}
+          {/* Sidebar - Descubra mais + Ads */}
           <aside className="space-y-6">
+            {/* Sidebar Ad 1 */}
+            <Card className="overflow-hidden border-2 border-yellow-500/20 bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/20 dark:to-amber-950/20">
+              <CardContent className="p-0">
+                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
+                  <Sparkles className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-500 uppercase tracking-wide">
+                    Publicidade
+                  </span>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="relative h-32 rounded-lg overflow-hidden">
+                    <Image
+                      src={sidebarAds[0].image}
+                      alt={sidebarAds[0].title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${sidebarAds[0].gradient} opacity-20`} />
+                  </div>
+                  <h3 className="font-bold text-base">{sidebarAds[0].title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {sidebarAds[0].description}
+                  </p>
+                  <Button 
+                    className={`w-full bg-gradient-to-r ${sidebarAds[0].gradient} text-white hover:opacity-90`}
+                    size="sm"
+                  >
+                    {sidebarAds[0].cta}
+                    <ExternalLink className="h-3 w-3 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             <div>
               <h3 className="text-lg font-bold mb-4">Descubra mais</h3>
               <div className="space-y-4">
-                {relatedArticles.map((related) => (
+                {relatedArticles.slice(0, 2).map((related) => (
                   <Link key={related.id} href={`/article/${related.id}`}>
                     <Card className="overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
                       <div className="relative h-32 w-full">
@@ -359,6 +463,68 @@ export default async function ArticlePage({
                   </Link>
                 ))}
               </div>
+            </div>
+
+            {/* Sidebar Ad 2 */}
+            <Card className="overflow-hidden border-2 border-yellow-500/20 bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/20 dark:to-amber-950/20">
+              <CardContent className="p-0">
+                <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
+                  <Sparkles className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-500 uppercase tracking-wide">
+                    Publicidade
+                  </span>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="relative h-32 rounded-lg overflow-hidden">
+                    <Image
+                      src={sidebarAds[1].image}
+                      alt={sidebarAds[1].title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${sidebarAds[1].gradient} opacity-20`} />
+                  </div>
+                  <h3 className="font-bold text-base">{sidebarAds[1].title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {sidebarAds[1].description}
+                  </p>
+                  <Button 
+                    className={`w-full bg-gradient-to-r ${sidebarAds[1].gradient} text-white hover:opacity-90`}
+                    size="sm"
+                  >
+                    {sidebarAds[1].cta}
+                    <ExternalLink className="h-3 w-3 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+              {relatedArticles.slice(2).map((related) => (
+                <Link key={related.id} href={`/article/${related.id}`}>
+                  <Card className="overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
+                    <div className="relative h-32 w-full">
+                      <Image
+                        src={related.image}
+                        alt={related.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <CardContent className="p-4">
+                      <Badge variant="secondary" className="mb-2 text-xs">
+                        {related.category}
+                      </Badge>
+                      <h4 className="font-semibold text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                        {related.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {related.timestamp}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
             </div>
           </aside>
         </div>
