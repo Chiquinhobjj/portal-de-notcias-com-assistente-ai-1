@@ -3,7 +3,7 @@ import NewsCard from "@/components/NewsCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Share2, Clock, ExternalLink, ArrowLeft } from "lucide-react";
+import { Share2, Clock, ExternalLink, ArrowLeft, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -140,6 +140,37 @@ const relatedArticles = [
   }
 ];
 
+// Sponsored content to insert in articles
+const sponsoredAds = [
+  {
+    id: "ad-1",
+    title: "Transforme seu negócio com IA",
+    description: "Descubra como a inteligência artificial pode revolucionar sua empresa. Agende uma demonstração gratuita.",
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+    cta: "Saber Mais",
+    link: "#",
+    gradient: "from-blue-500 to-cyan-500"
+  },
+  {
+    id: "ad-2",
+    title: "Plataforma líder em Cloud Computing",
+    description: "Migre sua infraestrutura para a nuvem com segurança e performance. 30 dias grátis para novos clientes.",
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop",
+    cta: "Começar Agora",
+    link: "#",
+    gradient: "from-purple-500 to-pink-500"
+  },
+  {
+    id: "ad-3",
+    title: "Curso Completo de Data Science",
+    description: "Aprenda análise de dados, machine learning e IA com os melhores instrutores. Certificado reconhecido.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop",
+    cta: "Inscrever-se",
+    link: "#",
+    gradient: "from-green-500 to-emerald-500"
+  }
+];
+
 export default async function ArticlePage({
   params,
 }: {
@@ -147,6 +178,70 @@ export default async function ArticlePage({
 }) {
   const { id } = await params;
   const article = articleData[id] || articleData["1"];
+
+  // Split content into paragraphs and insert ads
+  const contentParagraphs = article.content.split('\n\n');
+  const contentWithAds: JSX.Element[] = [];
+  let adIndex = 0;
+
+  contentParagraphs.forEach((paragraph: string, index: number) => {
+    // Check if paragraph is a heading (starts with **)
+    if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+      contentWithAds.push(
+        <h2 key={`heading-${index}`} className="text-2xl font-bold mt-8 mb-4">
+          {paragraph.replace(/\*\*/g, '')}
+        </h2>
+      );
+    } else {
+      contentWithAds.push(
+        <p key={`paragraph-${index}`} className="mb-6 text-foreground leading-relaxed">
+          {paragraph}
+        </p>
+      );
+    }
+
+    // Insert ad after every 3 paragraphs
+    if ((index + 1) % 3 === 0 && adIndex < sponsoredAds.length) {
+      const ad = sponsoredAds[adIndex];
+      contentWithAds.push(
+        <Card key={`ad-${adIndex}`} className="my-8 overflow-hidden border-2 border-yellow-500/20 bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-950/20 dark:to-amber-950/20">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border-b border-yellow-500/20">
+              <Sparkles className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+              <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-500 uppercase tracking-wide">
+                Publicidade
+              </span>
+            </div>
+            <div className="grid md:grid-cols-[200px_1fr] gap-4 p-4">
+              <div className="relative h-32 md:h-full rounded-lg overflow-hidden">
+                <Image
+                  src={ad.image}
+                  alt={ad.title}
+                  fill
+                  className="object-cover"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${ad.gradient} opacity-20`} />
+              </div>
+              <div className="flex flex-col justify-center gap-3">
+                <h3 className="font-bold text-lg">{ad.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {ad.description}
+                </p>
+                <Button 
+                  className={`w-fit bg-gradient-to-r ${ad.gradient} text-white hover:opacity-90`}
+                  size="sm"
+                >
+                  {ad.cta}
+                  <ExternalLink className="h-3 w-3 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+      adIndex++;
+    }
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -201,23 +296,9 @@ export default async function ArticlePage({
               />
             </div>
 
-            {/* Article Content */}
+            {/* Article Content with Ads */}
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              {article.content.split('\n\n').map((paragraph: string, index: number) => {
-                // Check if paragraph is a heading (starts with **)
-                if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                  return (
-                    <h2 key={index} className="text-2xl font-bold mt-8 mb-4">
-                      {paragraph.replace(/\*\*/g, '')}
-                    </h2>
-                  );
-                }
-                return (
-                  <p key={index} className="mb-6 text-foreground leading-relaxed">
-                    {paragraph}
-                  </p>
-                );
-              })}
+              {contentWithAds}
             </div>
 
             {/* Related Sources */}
