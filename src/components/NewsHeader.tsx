@@ -18,12 +18,27 @@ import {
   Globe,
   Calendar,
   Bot,
+  User,
+  LogOut,
+  Settings,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import SidebarAssistant from "./SidebarAssistant";
 import { UserPreferences } from "./UserPreferences";
 import { FastNews } from "./FastNews";
 import Image from "next/image";
+import { authClient, useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const rotatingData = [
   {
@@ -157,10 +172,13 @@ interface NewsHeaderProps {
 
 export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const { data: session, isPending, refetch } = useSession();
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [fastNewsOpen, setFastNewsOpen] = useState(false);
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Auto-rotate data with smooth animation
   useEffect(() => {
@@ -170,10 +188,38 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
         setCurrentDataIndex((prev) => (prev + 1) % rotatingData.length);
         setIsAnimating(false);
       }, 300);
-    }, 4000); // Change every 4 seconds
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleSignOut = async () => {
+    setIsLoggingOut(true);
+    try {
+      const { error } = await authClient.signOut();
+      if (error?.code) {
+        toast.error("Erro ao sair. Tente novamente.");
+      } else {
+        localStorage.removeItem("bearer_token");
+        refetch();
+        toast.success("Você saiu da sua conta.");
+        router.push("/");
+      }
+    } catch (error) {
+      toast.error("Erro ao sair. Tente novamente.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   const currentData = rotatingData[currentDataIndex];
 
@@ -182,10 +228,9 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-2 md:gap-4">
-            {/* Logo - Normal para light, Branca para dark */}
+            {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
               <div className="relative w-24 md:w-32 h-8 md:h-10">
-                {/* Logo Normal - Light Mode */}
                 <Image
                   src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Ativo-6-4x-1761161927495.png"
                   alt="IspiAI"
@@ -193,7 +238,6 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
                   className="object-contain object-left dark:hidden"
                   priority
                 />
-                {/* Logo Branca - Dark Mode */}
                 <Image
                   src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761161927239.png"
                   alt="IspiAI"
@@ -204,7 +248,7 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               </div>
             </Link>
 
-            {/* CTA Buttons - XomanoAI e IspiAI em 30s - Sempre Visíveis */}
+            {/* CTA Buttons - XomanoAI e IspiAI em 30s */}
             <div className="flex-1 flex items-center justify-center gap-2 md:gap-3">
               <Button
                 size="sm"
@@ -239,11 +283,81 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               </Button>
 
               <UserPreferences />
+
+              {/* Auth UI */}
+              {isPending ? (
+                <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center">
+                  <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 md:h-10 md:w-10 rounded-full p-0"
+                    >
+                      <Avatar className="h-8 w-8 md:h-10 md:w-10">
+                        <AvatarFallback className="bg-gradient-to-br from-[#0EA5E9] to-[#0C4A6E] text-white font-semibold text-xs md:text-sm">
+                          {getUserInitials(session.user.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {session.user.name}
+                        </p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {session.user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem disabled>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Perfil</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Configurações</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      disabled={isLoggingOut}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>{isLoggingOut ? "Saindo..." : "Sair"}</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push("/login")}
+                    className="h-8 md:h-10 text-xs md:text-sm"
+                  >
+                    Entrar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => router.push("/register")}
+                    className="h-8 md:h-10 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm"
+                  >
+                    Criar Conta
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Rotating Data Ticker - TV News Style */}
+        {/* Rotating Data Ticker */}
         <div className="border-t bg-gradient-to-r from-muted/30 via-muted/50 to-muted/30">
           <div className="container mx-auto px-4 py-2.5 overflow-hidden">
             <div className="flex items-center justify-center gap-4">

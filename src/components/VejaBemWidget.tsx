@@ -51,7 +51,7 @@ export function VejaBemWidget() {
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xl font-bold text-white">VEJA BEM</h2>
           <Link 
-            href="#" 
+            href="/veja-bem" 
             className="text-xs text-white/80 hover:text-white transition-colors flex items-center gap-1"
           >
             VER MAIS
