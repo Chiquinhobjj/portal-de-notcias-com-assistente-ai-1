@@ -3,39 +3,45 @@
 import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface VideoAdBannerProps {
   label?: string;
+  variant?: "carousel" | "grid";
 }
 
 const videoAds = [
   {
     id: 1,
-    title: "Anúncio Premium 1",
-    description: "Descubra as melhores ofertas em tecnologia",
+    title: "Kaique Mendes",
+    description: "A gente tem reunido boa notícia dia dia",
+    thumbnail: "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=800&h=600&fit=crop",
     color: "from-blue-500/20 to-cyan-500/20",
   },
   {
     id: 2,
-    title: "Anúncio Premium 2",
-    description: "Soluções empresariais para o seu negócio",
+    title: "Nota Cuiabá",
+    description: "Volta como melhor para a cidade",
+    thumbnail: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop",
     color: "from-purple-500/20 to-pink-500/20",
   },
   {
     id: 3,
-    title: "Anúncio Premium 3",
-    description: "Inovação e qualidade ao seu alcance",
+    title: "Banco Central do Norte",
+    description: "A riqueza produção aumentou",
+    thumbnail: "https://images.unsplash.com/photo-1560472355-536de3962603?w=800&h=600&fit=crop",
     color: "from-green-500/20 to-emerald-500/20",
   },
   {
     id: 4,
-    title: "Anúncio Premium 4",
-    description: "Transforme sua experiência digital",
+    title: "OAB Mato Grosso",
+    description: "Mais do que profissão, a advocacia é missão",
+    thumbnail: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=600&fit=crop",
     color: "from-orange-500/20 to-red-500/20",
   },
 ];
 
-export const VideoAdBanner = ({ label = "Publicidade em Vídeo" }: VideoAdBannerProps) => {
+export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "carousel" }: VideoAdBannerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const nextSlide = () => {
@@ -50,6 +56,61 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo" }: VideoAdBanner
     setCurrentIndex(index);
   };
 
+  // Grid variant - cards layout
+  if (variant === "grid") {
+    return (
+      <div className="w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {videoAds.slice(0, 3).map((ad) => (
+            <div
+              key={ad.id}
+              className="group relative aspect-video bg-gradient-to-br from-muted/60 to-muted/40 rounded-lg border border-border/50 overflow-hidden cursor-pointer hover:border-primary/50 transition-all"
+            >
+              {/* Thumbnail Image */}
+              <div className="absolute inset-0">
+                <Image
+                  src={ad.thumbnail}
+                  alt={ad.title}
+                  fill
+                  className="object-cover opacity-80 group-hover:opacity-90 transition-opacity"
+                />
+                {/* Gradient Overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${ad.color} mix-blend-multiply`} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              </div>
+
+              {/* Content */}
+              <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+                {/* Play Button */}
+                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                  <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                </div>
+
+                {/* Text Info */}
+                <div className="mt-4 space-y-1">
+                  <p className="text-sm font-semibold text-white drop-shadow-lg">
+                    {ad.title}
+                  </p>
+                  <p className="text-xs text-white/90 drop-shadow-md max-w-xs">
+                    {ad.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Label */}
+              <div className="absolute top-3 left-3 z-10">
+                <span className="text-[10px] uppercase tracking-wider text-white/80 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
+                  PUBLICIDADE
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Carousel variant (original)
   const currentAd = videoAds[currentIndex];
 
   return (

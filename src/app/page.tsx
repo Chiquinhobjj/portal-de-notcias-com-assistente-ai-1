@@ -220,14 +220,13 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Video Ad Section - Dedicated Line */}
+        {/* Video Ad Section - Grid Format (Cards) */}
         <div className="mb-8 py-4">
-          <div className="text-center mb-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Publicidade em Vídeo
-            </h3>
+          <div className="mb-6">
+            <h3 className="text-xl font-bold mb-2">Publicitários</h3>
+            <div className="h-0.5 bg-border w-full" />
           </div>
-          <VideoAdBanner />
+          <VideoAdBanner variant="grid" />
         </div>
 
         {/* Main Content Grid with Square Ad */}
