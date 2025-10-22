@@ -71,13 +71,14 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
 
-  // Prevent hydration mismatch
+  // Prevent hydration mismatch - mount first
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load bookmarks from localStorage
+  // Load bookmarks from localStorage after mount
   useEffect(() => {
     if (!mounted) return;
     
@@ -89,7 +90,17 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     } catch (error) {
       console.error("Failed to load bookmarks:", error);
     }
+    
+    // Mark content as ready after loading saved data
+    setContentReady(true);
   }, [mounted]);
+
+  // Reset when opened
+  useEffect(() => {
+    if (isOpen && mounted) {
+      setCurrentIndex(0);
+    }
+  }, [isOpen, mounted]);
 
   // Insert sponsored cards every 5 articles
   const contentItems = articles.reduce<(FastNewsArticle | SponsoredCard)[]>((acc, article, index) => {
@@ -102,7 +113,8 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
 
   const currentItem = contentItems[currentIndex];
   const isSponsored = currentItem && 'advertiser' in currentItem;
-  const isBookmarked = currentItem && 'id' in currentItem && bookmarkedIds.includes(currentItem.id);
+  const isArticle = currentItem && 'category' in currentItem;
+  const isBookmarked = currentItem && bookmarkedIds.includes(currentItem.id);
 
   const goToNext = () => {
     if (currentIndex < contentItems.length - 1) {
@@ -124,7 +136,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     const shareData = {
       title: currentItem.title,
       text: currentItem.description,
-      url: window.location.origin + ('id' in currentItem ? `/article/${currentItem.id}` : '#'),
+      url: window.location.origin + (isArticle ? `/article/${currentItem.id}` : '#'),
     };
 
     if (navigator.share) {
@@ -143,13 +155,13 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
 
   const fallbackShare = () => {
     if (!currentItem) return;
-    const url = window.location.origin + ('id' in currentItem ? `/article/${currentItem.id}` : '#');
+    const url = window.location.origin + (isArticle ? `/article/${currentItem.id}` : '#');
     navigator.clipboard.writeText(url);
     toast.success("Link copiado para a área de transferência!");
   };
 
   const handleBookmark = () => {
-    if (!currentItem || !('id' in currentItem)) return;
+    if (!currentItem || !isArticle) return;
     
     const articleId = currentItem.id;
     let newBookmarks: string[];
@@ -171,9 +183,9 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  // Keyboard navigation
+  // Keyboard navigation - MUST be before any conditional returns
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !mounted || !contentReady) return;
 
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" || e.key === " ") {
@@ -189,7 +201,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentIndex, isOpen]);
+  }, [currentIndex, isOpen, mounted, contentReady]);
 
   // Touch gestures
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -210,9 +222,8 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  // Mouse wheel navigation - FIX: Don't call preventDefault in passive listener
+  // Mouse wheel navigation
   const handleWheel = (e: React.WheelEvent) => {
-    // Don't preventDefault - just handle navigation
     if (e.deltaY > 0) {
       goToNext();
     } else if (e.deltaY < 0) {
@@ -220,7 +231,10 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  if (!isOpen || !currentItem || !mounted) return null;
+  // Early return AFTER all hooks
+  if (!mounted || !contentReady || !isOpen || contentItems.length === 0 || !currentItem) {
+    return null;
+  }
 
   return (
     <div 
@@ -249,7 +263,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             </span>
           ) : (
             <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-              {'category' in currentItem ? currentItem.category : ''}
+              {isArticle && (currentItem as FastNewsArticle).category}
             </span>
           )}
         </div>
@@ -288,7 +302,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             // Sponsored Content
             <div className="space-y-4">
               <div className="text-xs text-white/70 uppercase tracking-wider">
-                {'advertiser' in currentItem ? currentItem.advertiser : ''}
+                {(currentItem as SponsoredCard).advertiser}
               </div>
               <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
                 {currentItem.title}
@@ -298,7 +312,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
               </p>
               <div className="flex items-center gap-3 pt-4">
                 <a
-                  href={'ctaUrl' in currentItem ? currentItem.ctaUrl : '#'}
+                  href={(currentItem as SponsoredCard).ctaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => toast.info("Link patrocinado aberto")}
@@ -307,7 +321,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                     size="lg" 
                     className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
                   >
-                    {'ctaText' in currentItem ? currentItem.ctaText : 'Saiba Mais'}
+                    {(currentItem as SponsoredCard).ctaText}
                     <ExternalLink className="w-5 h-5 ml-2" />
                   </Button>
                 </a>
@@ -322,13 +336,15 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
               <p className="text-xl text-white/95 leading-relaxed drop-shadow-lg">
                 {currentItem.description}
               </p>
-              <div className="flex items-center gap-3 text-sm text-white/80 pt-2">
-                <span className="font-semibold">{'source' in currentItem ? currentItem.source : ''}</span>
-                <span>•</span>
-                <span>{'timestamp' in currentItem ? currentItem.timestamp : ''}</span>
-              </div>
+              {isArticle && (
+                <div className="flex items-center gap-3 text-sm text-white/80 pt-2">
+                  <span className="font-semibold">{(currentItem as FastNewsArticle).source}</span>
+                  <span>•</span>
+                  <span>{(currentItem as FastNewsArticle).timestamp}</span>
+                </div>
+              )}
               <div className="flex items-center gap-3 pt-4">
-                <Link href={`/article/${'id' in currentItem ? currentItem.id : ''}`} onClick={onClose}>
+                <Link href={`/article/${currentItem.id}`} onClick={onClose}>
                   <Button 
                     size="lg" 
                     className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
@@ -344,16 +360,18 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                 >
                   <Share2 className="w-5 h-5" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  onClick={handleBookmark}
-                  className={`w-12 h-12 rounded-full backdrop-blur-sm border-white/20 text-white hover:bg-white/20 ${
-                    isBookmarked ? 'bg-primary/30' : 'bg-white/10'
-                  }`}
-                >
-                  <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-                </Button>
+                {isArticle && (
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={handleBookmark}
+                    className={`w-12 h-12 rounded-full backdrop-blur-sm border-white/20 text-white hover:bg-white/20 ${
+                      isBookmarked ? 'bg-primary/30' : 'bg-white/10'
+                    }`}
+                  >
+                    <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
+                  </Button>
+                )}
               </div>
             </div>
           )}
