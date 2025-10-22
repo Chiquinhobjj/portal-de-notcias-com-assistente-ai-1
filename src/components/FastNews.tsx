@@ -232,7 +232,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             </span>
           ) : (
             <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-              {'category' in currentItem && currentItem.category}
+              {'category' in currentItem ? currentItem.category : ''}
             </span>
           )}
         </div>
@@ -271,7 +271,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             // Sponsored Content
             <div className="space-y-4">
               <div className="text-xs text-white/70 uppercase tracking-wider">
-                {'advertiser' in currentItem && currentItem.advertiser}
+                {'advertiser' in currentItem ? currentItem.advertiser : ''}
               </div>
               <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
                 {currentItem.title}
@@ -290,7 +290,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                     size="lg" 
                     className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
                   >
-                    {'ctaText' in currentItem && currentItem.ctaText}
+                    {'ctaText' in currentItem ? currentItem.ctaText : 'Saiba Mais'}
                     <ExternalLink className="w-5 h-5 ml-2" />
                   </Button>
                 </a>
@@ -300,18 +300,18 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             // News Content
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
-                {'title' in currentItem && currentItem.title}
+                {currentItem.title}
               </h1>
               <p className="text-xl text-white/95 leading-relaxed drop-shadow-lg">
-                {'description' in currentItem && currentItem.description}
+                {currentItem.description}
               </p>
               <div className="flex items-center gap-3 text-sm text-white/80 pt-2">
-                <span className="font-semibold">{'source' in currentItem && currentItem.source}</span>
+                <span className="font-semibold">{'source' in currentItem ? currentItem.source : ''}</span>
                 <span>•</span>
-                <span>{'timestamp' in currentItem && currentItem.timestamp}</span>
+                <span>{'timestamp' in currentItem ? currentItem.timestamp : ''}</span>
               </div>
               <div className="flex items-center gap-3 pt-4">
-                <Link href={`/article/${'id' in currentItem && currentItem.id}`} onClick={onClose}>
+                <Link href={`/article/${'id' in currentItem ? currentItem.id : ''}`} onClick={onClose}>
                   <Button 
                     size="lg" 
                     className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
