@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Search,
   Sun,
   Moon,
   MessageSquare,
@@ -20,10 +18,12 @@ import {
   Activity,
   Globe,
   Calendar,
+  Bot,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import SidebarAssistant from "./SidebarAssistant";
 import { UserPreferences } from "./UserPreferences";
+import { FastNews } from "./FastNews";
 import Image from "next/image";
 
 const rotatingData = [
@@ -143,9 +143,23 @@ const rotatingData = [
   },
 ];
 
-export default function NewsHeader() {
+interface NewsHeaderProps {
+  articles?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    category: string;
+    source: string;
+    timestamp: string;
+    sources: number;
+  }>;
+}
+
+export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const { theme, setTheme } = useTheme();
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const [fastNewsOpen, setFastNewsOpen] = useState(false);
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -191,27 +205,29 @@ export default function NewsHeader() {
               </div>
             </Link>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl hidden md:block">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Ispia o que importa..."
-                  className="pl-10 pr-4"
-                />
-              </div>
+            {/* CTA Buttons - XomanoAI e IspiAI em 30s */}
+            <div className="flex-1 max-w-2xl hidden md:flex items-center justify-center gap-3">
+              <Button
+                size="lg"
+                className="shadow-md hover:shadow-lg transition-all gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
+                onClick={() => setAssistantOpen(true)}
+              >
+                <Bot className="w-5 h-5" />
+                XomanoAI
+              </Button>
+              
+              <Button
+                size="lg"
+                className="shadow-md hover:shadow-lg transition-all gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
+                onClick={() => setFastNewsOpen(true)}
+              >
+                <Zap className="w-5 h-5" fill="currentColor" />
+                IspiAI em 30s
+              </Button>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-
               <Button
                 variant="ghost"
                 size="icon"
@@ -226,7 +242,7 @@ export default function NewsHeader() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setAssistantOpen(true)}
-                className="relative"
+                className="relative md:hidden"
                 title="XomanoAI - Assistente Inteligente"
               >
                 <MessageSquare className="h-5 w-5" />
@@ -294,7 +310,17 @@ export default function NewsHeader() {
         </div>
       </header>
 
-      <SidebarAssistant open={assistantOpen} onOpenChange={setAssistantOpen} />
+      <SidebarAssistant 
+        open={assistantOpen} 
+        onOpenChange={setAssistantOpen}
+        onFastNewsOpen={() => setFastNewsOpen(true)}
+      />
+      
+      <FastNews
+        articles={articles}
+        isOpen={fastNewsOpen}
+        onClose={() => setFastNewsOpen(false)}
+      />
     </>
   );
 }

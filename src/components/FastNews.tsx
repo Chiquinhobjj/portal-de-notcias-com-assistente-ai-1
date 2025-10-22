@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, ChevronUp, ChevronDown, Share2, Bookmark } from "lucide-react";
+import { X, ChevronUp, ChevronDown, Share2, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 
 interface FastNewsArticle {
   id: string;
@@ -16,22 +17,76 @@ interface FastNewsArticle {
   sources: number;
 }
 
+interface SponsoredCard {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  ctaText: string;
+  ctaUrl: string;
+  advertiser: string;
+}
+
 interface FastNewsProps {
   articles: FastNewsArticle[];
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Sponsored content cards
+const sponsoredCards: SponsoredCard[] = [
+  {
+    id: "sp1",
+    title: "Impulsione seu Negócio com IA",
+    description: "Descubra como empresas estão aumentando produtividade em 300% com automação inteligente.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    ctaText: "Saiba Mais",
+    ctaUrl: "#",
+    advertiser: "TechSolutions Inc",
+  },
+  {
+    id: "sp2",
+    title: "Invista no Futuro Digital",
+    description: "Carteira diversificada de criptomoedas com gestão profissional e segurança garantida.",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=600&fit=crop",
+    ctaText: "Começar Agora",
+    ctaUrl: "#",
+    advertiser: "CryptoVest",
+  },
+  {
+    id: "sp3",
+    title: "Transforme Dados em Decisões",
+    description: "Plataforma de analytics com IA que prevê tendências de mercado antes da concorrência.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+    ctaText: "Teste Grátis",
+    ctaUrl: "#",
+    advertiser: "DataInsights Pro",
+  },
+];
+
 export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const currentArticle = articles[currentIndex];
+  // Insert sponsored cards every 5 articles
+  const contentItems = articles.reduce<(FastNewsArticle | SponsoredCard)[]>((acc, article, index) => {
+    acc.push(article);
+    // Every 5 articles, insert a sponsored card
+    if ((index + 1) % 5 === 0 && sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]) {
+      acc.push(sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]);
+    }
+    return acc;
+  }, []);
+
+  const currentItem = contentItems[currentIndex];
+  const isSponsored = currentItem && 'advertiser' in currentItem;
 
   const goToNext = () => {
-    if (currentIndex < articles.length - 1) {
+    if (currentIndex < contentItems.length - 1) {
       setCurrentIndex(currentIndex + 1);
+    } else {
+      onClose(); // Close when reaching the end
     }
   };
 
@@ -46,8 +101,14 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     if (!isOpen) return;
 
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") goToNext();
-      if (e.key === "ArrowUp") goToPrevious();
+      if (e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        goToNext();
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        goToPrevious();
+      }
       if (e.key === "Escape") onClose();
     };
 
@@ -65,17 +126,18 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   };
 
   const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 150) {
+    if (touchStart - touchEnd > 75) {
       goToNext();
     }
 
-    if (touchStart - touchEnd < -150) {
+    if (touchStart - touchEnd < -75) {
       goToPrevious();
     }
   };
 
   // Mouse wheel navigation
   const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
     if (e.deltaY > 0) {
       goToNext();
     } else if (e.deltaY < 0) {
@@ -83,158 +145,170 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  if (!isOpen || !currentArticle) return null;
+  if (!isOpen || !currentItem) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-background"
+      className="fixed inset-0 z-50 bg-black"
       onWheel={handleWheel}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-background via-background/95 to-transparent backdrop-blur-sm p-6 flex items-center justify-between border-b border-border/50">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">
-            Ispiai em 30s
-          </h2>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-foreground">
-              {currentIndex + 1}
+      {/* Background Image - Full Screen */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-500"
+        style={{ 
+          backgroundImage: `url(${currentItem.image})`,
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+      </div>
+
+      {/* Top Header - Minimal */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {isSponsored ? (
+            <span className="px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
+              PATROCINADO
             </span>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-sm text-muted-foreground">
-              {articles.length}
+          ) : (
+            <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
+              {'category' in currentItem && currentItem.category}
             </span>
-          </div>
+          )}
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="hover:bg-background/80 rounded-full"
+          className="text-white hover:bg-white/20 rounded-full"
         >
           <X className="w-6 h-6" />
         </Button>
       </div>
 
-      {/* Main Content */}
-      <div className="relative h-full flex items-center justify-center pt-24 pb-32">
-        {/* Background Image with Enhanced Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url(${currentArticle.image})`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background/90 backdrop-blur-[2px]" />
-        </div>
-
-        {/* Content Card with Better Visibility */}
-        <div className="relative z-10 max-w-3xl mx-auto px-6">
-          <div className="bg-background/80 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl p-8 md:p-12 space-y-6 animate-fade-in">
-            {/* Category Badge */}
-            <div className="flex items-center justify-center">
-              <span className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-full shadow-lg">
-                {currentArticle.category}
-              </span>
-            </div>
-
-            {/* Title - More Prominent */}
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight text-center text-foreground">
-              {currentArticle.title}
-            </h1>
-
-            {/* Description - Better Contrast */}
-            <p className="text-lg md:text-xl text-foreground/90 text-center leading-relaxed font-medium">
-              {currentArticle.description}
-            </p>
-
-            {/* Meta Info - Enhanced */}
-            <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted-foreground pt-4 border-t border-border/50">
-              <span className="font-semibold text-foreground">{currentArticle.source}</span>
-              <span className="text-muted-foreground/50">•</span>
-              <span>{currentArticle.timestamp}</span>
-              <span className="text-muted-foreground/50">•</span>
-              <span className="font-semibold text-primary">{currentArticle.sources} fontes</span>
-            </div>
-
-            {/* Action Buttons - More Prominent */}
-            <div className="flex items-center justify-center gap-3 pt-6">
-              <Link href={`/article/${currentArticle.id}`}>
-                <Button 
-                  size="lg" 
-                  className="px-10 py-6 text-lg font-bold shadow-xl bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
-                >
-                  Ler Matéria Completa
-                </Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                size="icon"
-                className="w-12 h-12 rounded-full shadow-lg bg-background/90 backdrop-blur-sm"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="icon"
-                className="w-12 h-12 rounded-full shadow-lg bg-background/90 backdrop-blur-sm"
-              >
-                <Bookmark className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Controls - Enhanced */}
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goToPrevious}
-            disabled={currentIndex === 0}
-            className="rounded-full w-14 h-14 bg-background/90 backdrop-blur-md shadow-xl border-2 disabled:opacity-30"
-          >
-            <ChevronUp className="w-6 h-6" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goToNext}
-            disabled={currentIndex === articles.length - 1}
-            className="rounded-full w-14 h-14 bg-background/90 backdrop-blur-md shadow-xl border-2 disabled:opacity-30"
-          >
-            <ChevronDown className="w-6 h-6" />
-          </Button>
-        </div>
-
-        {/* Progress Indicator - Enhanced */}
-        <div className="absolute left-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-20">
-          {articles.map((_, index) => (
-            <button
+      {/* Progress Bar - Stories Style */}
+      <div className="absolute top-16 left-0 right-0 z-20 px-4">
+        <div className="flex gap-1">
+          {contentItems.map((_, index) => (
+            <div
               key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-16 rounded-full transition-all shadow-lg ${
-                index === currentIndex
-                  ? "bg-gradient-to-b from-[#0EA5E9] to-[#0C4A6E] scale-110"
-                  : index < currentIndex
-                  ? "bg-primary/50"
-                  : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-            />
+              className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden"
+            >
+              <div
+                className={`h-full bg-white transition-all duration-300 ${
+                  index < currentIndex ? "w-full" : index === currentIndex ? "w-full" : "w-0"
+                }`}
+              />
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Navigation Hint - Enhanced */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 text-center animate-bounce">
-        <div className="bg-background/80 backdrop-blur-md rounded-full px-6 py-3 border border-border/50 shadow-lg">
-          <p className="text-sm font-semibold text-foreground">
-            Use ↑ ↓ ou deslize para navegar
-          </p>
+      {/* Main Content - Stories/TikTok Style */}
+      <div className="relative h-full flex items-end justify-center pb-32 px-6">
+        <div className="relative z-10 max-w-2xl w-full animate-fade-in">
+          {isSponsored ? (
+            // Sponsored Content
+            <div className="space-y-4">
+              <div className="text-xs text-white/70 uppercase tracking-wider">
+                {'advertiser' in currentItem && currentItem.advertiser}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
+                {currentItem.title}
+              </h1>
+              <p className="text-xl text-white/95 leading-relaxed drop-shadow-lg">
+                {currentItem.description}
+              </p>
+              <div className="flex items-center gap-3 pt-4">
+                <a
+                  href={'ctaUrl' in currentItem ? currentItem.ctaUrl : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button 
+                    size="lg" 
+                    className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
+                  >
+                    {'ctaText' in currentItem && currentItem.ctaText}
+                    <ExternalLink className="w-5 h-5 ml-2" />
+                  </Button>
+                </a>
+              </div>
+            </div>
+          ) : (
+            // News Content
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
+                {'title' in currentItem && currentItem.title}
+              </h1>
+              <p className="text-xl text-white/95 leading-relaxed drop-shadow-lg">
+                {'description' in currentItem && currentItem.description}
+              </p>
+              <div className="flex items-center gap-3 text-sm text-white/80 pt-2">
+                <span className="font-semibold">{'source' in currentItem && currentItem.source}</span>
+                <span>•</span>
+                <span>{'timestamp' in currentItem && currentItem.timestamp}</span>
+              </div>
+              <div className="flex items-center gap-3 pt-4">
+                <Link href={`/article/${'id' in currentItem && currentItem.id}`}>
+                  <Button 
+                    size="lg" 
+                    className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
+                  >
+                    Ler Completo
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                >
+                  <Share2 className="w-5 h-5" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                >
+                  <Bookmark className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Navigation Zones - TikTok Style (Invisible tap areas) */}
+      <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={goToPrevious} />
+      <div className="absolute inset-y-0 right-0 w-2/3 z-10" onClick={goToNext} />
+
+      {/* Side Navigation Buttons - Hidden but accessible */}
+      <div className="absolute right-4 bottom-1/2 translate-y-1/2 flex flex-col gap-3 z-20 opacity-0 hover:opacity-100 transition-opacity">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={goToPrevious}
+          disabled={currentIndex === 0}
+          className="rounded-full w-12 h-12 bg-white/10 backdrop-blur-md border-white/20 text-white disabled:opacity-20"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={goToNext}
+          disabled={currentIndex === contentItems.length - 1}
+          className="rounded-full w-12 h-12 bg-white/10 backdrop-blur-md border-white/20 text-white disabled:opacity-20"
+        >
+          <ChevronDown className="w-6 h-6" />
+        </Button>
+      </div>
+
+      {/* Counter - Bottom Right */}
+      <div className="absolute bottom-4 right-4 z-20 text-white/70 text-sm font-medium">
+        {currentIndex + 1} / {contentItems.length}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MessageSquare, Send, Sparkles, RotateCcw, ThumbsUp, ThumbsDown, X } from "lucide-react";
+import { MessageSquare, Send, Sparkles, RotateCcw, ThumbsUp, ThumbsDown, Zap } from "lucide-react";
 
 interface Message {
   id: string;
@@ -17,9 +17,11 @@ interface Message {
 interface SidebarAssistantProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onFastNewsOpen?: () => void;
+  fastNewsOpen?: boolean;
 }
 
-export default function SidebarAssistant({ open, onOpenChange }: SidebarAssistantProps) {
+export default function SidebarAssistant({ open, onOpenChange, onFastNewsOpen }: SidebarAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -89,6 +91,16 @@ export default function SidebarAssistant({ open, onOpenChange }: SidebarAssistan
               <SheetTitle className="text-xl bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">XomanoAI</SheetTitle>
             </div>
             <div className="flex items-center gap-2">
+              {onFastNewsOpen && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onFastNewsOpen}
+                  title="IspiAI em 30s"
+                >
+                  <Zap className="h-4 w-4" fill="currentColor" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"

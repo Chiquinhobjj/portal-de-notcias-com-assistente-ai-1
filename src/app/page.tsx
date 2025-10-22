@@ -6,14 +6,10 @@ import CategoryFilter from "@/components/CategoryFilter";
 import NewsCard from "@/components/NewsCard";
 import { AdBanner } from "@/components/AdBanner";
 import { VideoAdBanner } from "@/components/VideoAdBanner";
-import { FastNews } from "@/components/FastNews";
-import SidebarAssistant from "@/components/SidebarAssistant";
-import { Button } from "@/components/ui/button";
-import { Zap, Bot } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Link2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 const heroArticle = {
   id: "1",
@@ -133,27 +129,13 @@ const featuredNews = [
 ];
 
 export default function Home() {
-  const [fastNewsOpen, setFastNewsOpen] = useState(false);
-  const [xomanoOpen, setXomanoOpen] = useState(false);
+  // Combine all articles for FastNews
   const allArticles = [heroArticle, ...newsArticles, ...featuredNews];
 
   return (
     <div className="min-h-screen bg-background">
-      <NewsHeader />
+      <NewsHeader articles={allArticles} />
       <CategoryFilter />
-
-      {/* FastNews Modal */}
-      <FastNews
-        articles={allArticles}
-        isOpen={fastNewsOpen}
-        onClose={() => setFastNewsOpen(false)}
-      />
-
-      {/* XomanoAI Sidebar */}
-      <SidebarAssistant
-        open={xomanoOpen}
-        onOpenChange={setXomanoOpen}
-      />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Top Banner Ad - Horizontal */}
@@ -352,33 +334,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Bottom Fixed Action Bar - XomanoAI and Ispiai em 30s */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t shadow-2xl">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          <div className="flex items-center justify-center gap-4">
-            {/* XomanoAI Button */}
-            <Button
-              size="lg"
-              className="shadow-lg hover:shadow-xl transition-all rounded-full px-8 gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
-              onClick={() => setXomanoOpen(!xomanoOpen)}
-            >
-              <Bot className="w-5 h-5" />
-              XomanoAI
-            </Button>
-            
-            {/* Ispiai em 30s Button */}
-            <Button
-              size="lg"
-              className="shadow-lg hover:shadow-xl transition-all rounded-full px-8 gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
-              onClick={() => setFastNewsOpen(true)}
-            >
-              <Zap className="w-5 h-5" fill="currentColor" />
-              Ispiai em 30s
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
