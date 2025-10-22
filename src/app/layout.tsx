@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { CopilotProvider } from "@/providers/copilot-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -22,7 +23,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <CopilotProvider>
+            {children}
+          </CopilotProvider>
           <Toaster position="top-center" richColors closeButton />
         </ThemeProvider>
       </body>
