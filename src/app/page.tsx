@@ -7,6 +7,10 @@ import NewsCard from "@/components/NewsCard";
 import { AdBanner } from "@/components/AdBanner";
 import { VideoAdBanner } from "@/components/VideoAdBanner";
 import { VejaBemWidget } from "@/components/VejaBemWidget";
+import { OpinionSection } from "@/components/OpinionSection";
+import { PoderesSection } from "@/components/PoderesSection";
+import { GeralSection } from "@/components/GeralSection";
+import { PoliciaSection } from "@/components/PoliciaSection";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Link2 } from "lucide-react";
 import Image from "next/image";
@@ -207,6 +211,9 @@ export default function Home() {
           <AdBanner variant="horizontal" size="small" />
         </div>
 
+        {/* Opinion Section */}
+        <OpinionSection />
+
         {/* Top Stories - Mixed Layout with Sidebar Ad */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -225,6 +232,9 @@ export default function Home() {
             <NewsCard key={article.id} {...article} variant="compact" />
           ))}
         </div>
+
+        {/* Poderes Section */}
+        <PoderesSection />
 
         {/* Video Ad Section - Grid Format (Cards) */}
         <div className="mb-8 py-4">
@@ -251,6 +261,9 @@ export default function Home() {
           <AdBanner variant="horizontal" size="small" />
         </div>
 
+        {/* Geral Section */}
+        <GeralSection />
+
         {/* Destaques Section with Sidebar Ad */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6">Destaques</h2>
@@ -265,6 +278,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* Polícia Section */}
+        <PoliciaSection />
 
         {/* More Stories Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
