@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { X, ChevronUp, ChevronDown, Share2, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Link from "next/link";
-import Image from "next/image";
 
 interface FastNewsArticle {
   id: string;
@@ -34,7 +33,6 @@ interface FastNewsProps {
   onClose: () => void;
 }
 
-// Sponsored content cards
 const sponsoredCards: SponsoredCard[] = [
   {
     id: "sp1",
@@ -67,20 +65,12 @@ const sponsoredCards: SponsoredCard[] = [
 
 export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
-  const [contentReady, setContentReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
-  // Prevent hydration mismatch - mount first
+  // Initialize component
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Load bookmarks from localStorage after mount
-  useEffect(() => {
-    if (!mounted) return;
+    if (typeof window === 'undefined') return;
     
     try {
       const saved = localStorage.getItem("bookmarked-articles");
@@ -91,48 +81,67 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
       console.error("Failed to load bookmarks:", error);
     }
     
-    // Mark content as ready after loading saved data
-    setContentReady(true);
-  }, [mounted]);
+    setIsReady(true);
+  }, []);
 
-  // Reset when opened
+  // Reset index when opened
   useEffect(() => {
-    if (isOpen && mounted) {
+    if (isOpen) {
       setCurrentIndex(0);
     }
-  }, [isOpen, mounted]);
+  }, [isOpen]);
 
-  // Insert sponsored cards every 5 articles
+  // Build content array
   const contentItems = articles.reduce<(FastNewsArticle | SponsoredCard)[]>((acc, article, index) => {
     acc.push(article);
-    if ((index + 1) % 5 === 0 && sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]) {
-      acc.push(sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]);
+    if ((index + 1) % 5 === 0) {
+      const sponsoredIndex = Math.floor((index + 1) / 5 - 1) % sponsoredCards.length;
+      if (sponsoredCards[sponsoredIndex]) {
+        acc.push(sponsoredCards[sponsoredIndex]);
+      }
     }
     return acc;
   }, []);
 
-  const currentItem = contentItems[currentIndex];
-  const isSponsored = currentItem && 'advertiser' in currentItem;
-  const isArticle = currentItem && 'category' in currentItem;
-  const isBookmarked = currentItem && bookmarkedIds.includes(currentItem.id);
-
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (currentIndex < contentItems.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex(prev => prev + 1);
     } else {
       onClose();
     }
-  };
+  }, [currentIndex, contentItems.length, onClose]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
+      setCurrentIndex(prev => prev - 1);
     }
-  };
+  }, [currentIndex]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen || !isReady) return;
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" || e.key === " ") {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        goToPrevious();
+      } else if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [isOpen, isReady, goToNext, goToPrevious, onClose]);
 
   const handleShare = async () => {
+    const currentItem = contentItems[currentIndex];
     if (!currentItem) return;
     
+    const isArticle = 'category' in currentItem;
     const shareData = {
       title: currentItem.title,
       text: currentItem.description,
@@ -145,23 +154,23 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
         toast.success("Compartilhado com sucesso!");
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
-          fallbackShare();
+          fallbackShare(currentItem, isArticle);
         }
       }
     } else {
-      fallbackShare();
+      fallbackShare(currentItem, isArticle);
     }
   };
 
-  const fallbackShare = () => {
-    if (!currentItem) return;
-    const url = window.location.origin + (isArticle ? `/article/${currentItem.id}` : '#');
+  const fallbackShare = (item: FastNewsArticle | SponsoredCard, isArticle: boolean) => {
+    const url = window.location.origin + (isArticle ? `/article/${item.id}` : '#');
     navigator.clipboard.writeText(url);
-    toast.success("Link copiado para a área de transferência!");
+    toast.success("Link copiado!");
   };
 
   const handleBookmark = () => {
-    if (!currentItem || !isArticle) return;
+    const currentItem = contentItems[currentIndex];
+    if (!currentItem || !('category' in currentItem)) return;
     
     const articleId = currentItem.id;
     let newBookmarks: string[];
@@ -183,89 +192,40 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  // Keyboard navigation - MUST be before any conditional returns
-  useEffect(() => {
-    if (!isOpen || !mounted || !contentReady) return;
-
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown" || e.key === " ") {
-        e.preventDefault();
-        goToNext();
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault();
-        goToPrevious();
-      }
-      if (e.key === "Escape") onClose();
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentIndex, isOpen, mounted, contentReady]);
-
-  // Touch gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientY);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 75) {
-      goToNext();
-    }
-
-    if (touchStart - touchEnd < -75) {
-      goToPrevious();
-    }
-  };
-
-  // Mouse wheel navigation
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.deltaY > 0) {
-      goToNext();
-    } else if (e.deltaY < 0) {
-      goToPrevious();
-    }
-  };
-
-  // Early return AFTER all hooks
-  if (!mounted || !contentReady || !isOpen || contentItems.length === 0 || !currentItem) {
+  // Don't render until ready
+  if (!isReady || !isOpen || contentItems.length === 0) {
     return null;
   }
 
+  const currentItem = contentItems[currentIndex];
+  if (!currentItem) return null;
+
+  const isSponsored = 'advertiser' in currentItem;
+  const isArticle = 'category' in currentItem;
+  const isBookmarked = bookmarkedIds.includes(currentItem.id);
+
   return (
-    <div 
-      className="fixed inset-0 z-50 bg-black"
-      onWheel={handleWheel}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Background Image - Full Screen */}
+    <div className="fixed inset-0 z-50 bg-black">
+      {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-        style={{ 
-          backgroundImage: `url(${currentItem.image})`,
-        }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${currentItem.image})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
       </div>
 
-      {/* Top Header - Minimal */}
+      {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isSponsored ? (
             <span className="px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
               PATROCINADO
             </span>
-          ) : (
+          ) : isArticle ? (
             <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
-              {isArticle && (currentItem as FastNewsArticle).category}
+              {(currentItem as FastNewsArticle).category}
             </span>
-          )}
+          ) : null}
         </div>
         <Button
           variant="ghost"
@@ -277,7 +237,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
         </Button>
       </div>
 
-      {/* Progress Bar - Stories Style */}
+      {/* Progress Bar */}
       <div className="absolute top-16 left-0 right-0 z-20 px-4">
         <div className="flex gap-1">
           {contentItems.map((_, index) => (
@@ -287,7 +247,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
             >
               <div
                 className={`h-full bg-white transition-all duration-300 ${
-                  index < currentIndex ? "w-full" : index === currentIndex ? "w-full" : "w-0"
+                  index <= currentIndex ? "w-full" : "w-0"
                 }`}
               />
             </div>
@@ -295,11 +255,10 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
         </div>
       </div>
 
-      {/* Main Content - Stories/TikTok Style */}
+      {/* Main Content */}
       <div className="relative h-full flex items-end justify-center pb-32 px-6">
         <div className="relative z-10 max-w-2xl w-full animate-fade-in">
           {isSponsored ? (
-            // Sponsored Content
             <div className="space-y-4">
               <div className="text-xs text-white/70 uppercase tracking-wider">
                 {(currentItem as SponsoredCard).advertiser}
@@ -328,7 +287,6 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
               </div>
             </div>
           ) : (
-            // News Content
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white drop-shadow-2xl">
                 {currentItem.title}
@@ -378,11 +336,19 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
         </div>
       </div>
 
-      {/* Navigation Zones - TikTok Style (Invisible tap areas) */}
-      <div className="absolute inset-y-0 left-0 w-1/3 z-10" onClick={goToPrevious} />
-      <div className="absolute inset-y-0 right-0 w-2/3 z-10" onClick={goToNext} />
+      {/* Navigation Zones */}
+      <button 
+        className="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer"
+        onClick={goToPrevious}
+        aria-label="Previous"
+      />
+      <button 
+        className="absolute inset-y-0 right-0 w-2/3 z-10 cursor-pointer"
+        onClick={goToNext}
+        aria-label="Next"
+      />
 
-      {/* Side Navigation Buttons - Hidden but accessible */}
+      {/* Side Navigation Buttons */}
       <div className="absolute right-4 bottom-1/2 translate-y-1/2 flex flex-col gap-3 z-20 opacity-0 hover:opacity-100 transition-opacity">
         <Button
           variant="outline"
@@ -404,7 +370,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
         </Button>
       </div>
 
-      {/* Counter - Bottom Right */}
+      {/* Counter */}
       <div className="absolute bottom-4 right-4 z-20 text-white/70 text-sm font-medium">
         {currentIndex + 1} / {contentItems.length}
       </div>
