@@ -6,7 +6,7 @@ import "@copilotkit/react-ui/styles.css";
 
 export function CopilotProvider({ children }: { children: React.ReactNode }) {
   return (
-    <CopilotKit runtimeUrl="/api/copilotkit">
+    <CopilotKit publicApiKey="ck_pub_9f0c54448666d032c42805fdb3d6163a">
       <CopilotSidebar
         defaultOpen={false}
         clickOutsideToClose={true}
