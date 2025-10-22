@@ -70,14 +70,26 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Load bookmarks from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("bookmarked-articles");
-    if (saved) {
-      setBookmarkedIds(JSON.parse(saved));
+    if (!mounted) return;
+    
+    try {
+      const saved = localStorage.getItem("bookmarked-articles");
+      if (saved) {
+        setBookmarkedIds(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error("Failed to load bookmarks:", error);
     }
-  }, []);
+  }, [mounted]);
 
   // Insert sponsored cards every 5 articles
   const contentItems = articles.reduce<(FastNewsArticle | SponsoredCard)[]>((acc, article, index) => {
@@ -151,7 +163,12 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
     
     setBookmarkedIds(newBookmarks);
-    localStorage.setItem("bookmarked-articles", JSON.stringify(newBookmarks));
+    
+    try {
+      localStorage.setItem("bookmarked-articles", JSON.stringify(newBookmarks));
+    } catch (error) {
+      console.error("Failed to save bookmarks:", error);
+    }
   };
 
   // Keyboard navigation
@@ -193,9 +210,9 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  // Mouse wheel navigation
+  // Mouse wheel navigation - FIX: Don't call preventDefault in passive listener
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
+    // Don't preventDefault - just handle navigation
     if (e.deltaY > 0) {
       goToNext();
     } else if (e.deltaY < 0) {
@@ -203,7 +220,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     }
   };
 
-  if (!isOpen || !currentItem) return null;
+  if (!isOpen || !currentItem || !mounted) return null;
 
   return (
     <div 
