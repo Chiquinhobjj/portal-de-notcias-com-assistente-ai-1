@@ -140,6 +140,15 @@
     animation: slideUp 0.5s ease-out;
   }
   
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -220,4 +229,15 @@ nextjs-portal {
 
 .dark .prose {
   color: var(--color-foreground);
+}
+
+/* Smooth transitions for interactive elements */
+button, a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus states for accessibility */
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

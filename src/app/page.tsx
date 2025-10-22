@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import NewsHeader from "@/components/NewsHeader";
 import CategoryFilter from "@/components/CategoryFilter";
 import NewsCard from "@/components/NewsCard";
@@ -134,13 +134,39 @@ const featuredNews = [
 ];
 
 export default function Home() {
+  const [selectedCategory, setSelectedCategory] = useState("for-you");
+  
   // Combine all articles for FastNews
   const allArticles = [heroArticle, ...newsArticles, ...featuredNews];
+
+  // Filter articles based on selected category
+  const filteredArticles = useMemo(() => {
+    if (selectedCategory === "for-you" || selectedCategory === "all" || selectedCategory === "top") {
+      return newsArticles;
+    }
+    
+    const categoryMap: Record<string, string> = {
+      tech: "Tecnologia",
+      finance: "Finanças",
+      sports: "Esportes",
+      entertainment: "Entretenimento"
+    };
+    
+    const targetCategory = categoryMap[selectedCategory];
+    if (!targetCategory) return newsArticles;
+    
+    return newsArticles.filter(article => 
+      article.category.toLowerCase().includes(targetCategory.toLowerCase()) ||
+      targetCategory.toLowerCase().includes(article.category.toLowerCase())
+    );
+  }, [selectedCategory]);
+
+  const displayArticles = filteredArticles.length > 0 ? filteredArticles : newsArticles;
 
   return (
     <div className="min-h-screen bg-background">
       <NewsHeader articles={allArticles} />
-      <CategoryFilter />
+      <CategoryFilter onCategoryChange={setSelectedCategory} />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Top Banner Ad - Horizontal */}
@@ -158,7 +184,7 @@ export default function Home() {
             
             {/* 3 Horizontal Articles with Image on Right - Takes 4 columns */}
             <div className="lg:col-span-4 flex flex-col gap-4">
-              {newsArticles.slice(0, 3).map((article) => (
+              {displayArticles.slice(0, 3).map((article) => (
                 <Link 
                   key={article.id} 
                   href={`/article/${article.id}`}
@@ -217,7 +243,7 @@ export default function Home() {
         {/* Top Stories - Mixed Layout with Sidebar Ad */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {newsArticles.slice(3, 6).map((article) => (
+            {displayArticles.slice(3, 6).map((article) => (
               <NewsCard key={article.id} {...article} variant="standard" />
             ))}
           </div>
@@ -228,7 +254,7 @@ export default function Home() {
 
         {/* Featured Row - Horizontal Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {newsArticles.slice(6, 8).map((article) => (
+          {displayArticles.slice(6, 8).map((article) => (
             <NewsCard key={article.id} {...article} variant="compact" />
           ))}
         </div>
@@ -247,13 +273,13 @@ export default function Home() {
 
         {/* Main Content Grid with Square Ad */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          {newsArticles.slice(0, 2).map((article) => (
+          {displayArticles.slice(0, 2).map((article) => (
             <NewsCard key={article.id} {...article} variant="standard" />
           ))}
           <div className="flex items-start">
             <AdBanner variant="square" size="large" />
           </div>
-          <NewsCard {...newsArticles[2]} variant="standard" />
+          <NewsCard {...displayArticles[2]} variant="standard" />
         </div>
 
         {/* Horizontal Ad */}
@@ -284,7 +310,7 @@ export default function Home() {
 
         {/* More Stories Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {newsArticles.slice(3, 6).map((article) => (
+          {displayArticles.slice(3, 6).map((article) => (
             <NewsCard key={`more-${article.id}`} {...article} variant="standard" />
           ))}
         </div>
@@ -296,14 +322,14 @@ export default function Home() {
 
         {/* Final Compact Section with Inline Ads */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {newsArticles.slice(6, 8).map((article) => (
+          {displayArticles.slice(6, 8).map((article) => (
             <NewsCard key={`final-${article.id}`} {...article} variant="compact" />
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
           <AdBanner variant="square" size="medium" />
-          {newsArticles.slice(0, 2).map((article) => (
+          {displayArticles.slice(0, 2).map((article) => (
             <NewsCard key={`final2-${article.id}`} {...article} variant="compact" />
           ))}
         </div>
@@ -315,7 +341,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-12 mt-20">
+      <footer className="border-t py-12 mt-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -327,27 +353,30 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Categorias</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Tecnologia & Ciência</li>
-                <li>Finanças</li>
-                <li>Esportes</li>
-                <li>Entretenimento</li>
+                <li><Link href="/categoria/tecnologia" className="hover:text-primary transition-colors">Tecnologia & Ciência</Link></li>
+                <li><Link href="/categoria/financas" className="hover:text-primary transition-colors">Finanças</Link></li>
+                <li><Link href="/categoria/esportes" className="hover:text-primary transition-colors">Esportes</Link></li>
+                <li><Link href="/categoria/entretenimento" className="hover:text-primary transition-colors">Entretenimento</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Sobre</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Quem Somos</li>
-                <li>Contato</li>
-                <li>Transparência Editorial</li>
-                <li>Privacidade</li>
-                <li>Termos de Uso</li>
+                <li><Link href="/sobre" className="hover:text-primary transition-colors">Quem Somos</Link></li>
+                <li><Link href="/contato" className="hover:text-primary transition-colors">Contato</Link></li>
+                <li><Link href="/transparencia" className="hover:text-primary transition-colors">Transparência Editorial</Link></li>
+                <li><Link href="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link></li>
+                <li><Link href="/termos" className="hover:text-primary transition-colors">Termos de Uso</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">XomanoAI</h4>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-4">
                 Assistente inteligente baseado no protocolo AG-UI para experiência personalizada com HITL.
               </p>
+              <Link href="/xomano" className="text-sm text-primary hover:underline">
+                Saiba mais →
+              </Link>
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">

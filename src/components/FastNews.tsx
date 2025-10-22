@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, ChevronUp, ChevronDown, Share2, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -68,11 +69,19 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+
+  // Load bookmarks from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("bookmarked-articles");
+    if (saved) {
+      setBookmarkedIds(JSON.parse(saved));
+    }
+  }, []);
 
   // Insert sponsored cards every 5 articles
   const contentItems = articles.reduce<(FastNewsArticle | SponsoredCard)[]>((acc, article, index) => {
     acc.push(article);
-    // Every 5 articles, insert a sponsored card
     if ((index + 1) % 5 === 0 && sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]) {
       acc.push(sponsoredCards[Math.floor((index + 1) / 5 - 1) % sponsoredCards.length]);
     }
@@ -81,12 +90,13 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
 
   const currentItem = contentItems[currentIndex];
   const isSponsored = currentItem && 'advertiser' in currentItem;
+  const isBookmarked = currentItem && 'id' in currentItem && bookmarkedIds.includes(currentItem.id);
 
   const goToNext = () => {
     if (currentIndex < contentItems.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      onClose(); // Close when reaching the end
+      onClose();
     }
   };
 
@@ -94,6 +104,54 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
+  };
+
+  const handleShare = async () => {
+    if (!currentItem) return;
+    
+    const shareData = {
+      title: currentItem.title,
+      text: currentItem.description,
+      url: window.location.origin + ('id' in currentItem ? `/article/${currentItem.id}` : '#'),
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        toast.success("Compartilhado com sucesso!");
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          fallbackShare();
+        }
+      }
+    } else {
+      fallbackShare();
+    }
+  };
+
+  const fallbackShare = () => {
+    if (!currentItem) return;
+    const url = window.location.origin + ('id' in currentItem ? `/article/${currentItem.id}` : '#');
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado para a área de transferência!");
+  };
+
+  const handleBookmark = () => {
+    if (!currentItem || !('id' in currentItem)) return;
+    
+    const articleId = currentItem.id;
+    let newBookmarks: string[];
+    
+    if (bookmarkedIds.includes(articleId)) {
+      newBookmarks = bookmarkedIds.filter(id => id !== articleId);
+      toast.success("Removido dos favoritos");
+    } else {
+      newBookmarks = [...bookmarkedIds, articleId];
+      toast.success("Adicionado aos favoritos!");
+    }
+    
+    setBookmarkedIds(newBookmarks);
+    localStorage.setItem("bookmarked-articles", JSON.stringify(newBookmarks));
   };
 
   // Keyboard navigation
@@ -226,6 +284,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                   href={'ctaUrl' in currentItem ? currentItem.ctaUrl : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => toast.info("Link patrocinado aberto")}
                 >
                   <Button 
                     size="lg" 
@@ -252,7 +311,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                 <span>{'timestamp' in currentItem && currentItem.timestamp}</span>
               </div>
               <div className="flex items-center gap-3 pt-4">
-                <Link href={`/article/${'id' in currentItem && currentItem.id}`}>
+                <Link href={`/article/${'id' in currentItem && currentItem.id}`} onClick={onClose}>
                   <Button 
                     size="lg" 
                     className="px-8 py-6 text-lg font-bold shadow-xl bg-white text-black hover:bg-white/90"
@@ -263,6 +322,7 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                 <Button 
                   variant="outline" 
                   size="icon"
+                  onClick={handleShare}
                   className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
                 >
                   <Share2 className="w-5 h-5" />
@@ -270,9 +330,12 @@ export const FastNews = ({ articles, isOpen, onClose }: FastNewsProps) => {
                 <Button 
                   variant="outline" 
                   size="icon"
-                  className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                  onClick={handleBookmark}
+                  className={`w-12 h-12 rounded-full backdrop-blur-sm border-white/20 text-white hover:bg-white/20 ${
+                    isBookmarked ? 'bg-primary/30' : 'bg-white/10'
+                  }`}
                 >
-                  <Bookmark className="w-5 h-5" />
+                  <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
                 </Button>
               </div>
             </div>
