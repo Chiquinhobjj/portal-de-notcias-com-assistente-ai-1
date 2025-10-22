@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import NewsHeader from "@/components/NewsHeader";
 import CategoryFilter from "@/components/CategoryFilter";
 import NewsCard from "@/components/NewsCard";
@@ -16,128 +16,44 @@ import { Clock, Link2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-const heroArticle = {
-  id: "1",
-  title: "OpenAI lança navegador Atlas com IA para desafiar Chrome",
-  description: "Navegador integra ChatGPT e modo agente que executa tarefas automaticamente, derrubando ações da Alphabet em 3% após o anúncio.",
-  image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=800&fit=crop",
-  category: "Tecnologia",
-  source: "TechCrunch",
-  timestamp: "há 45 segundos",
-  sources: 53,
-};
-
-const newsArticles = [
-  {
-    id: "2",
-    title: "Meta corta 600 empregos de IA no Superintelligence Labs",
-    description: "Empresa reestrutura divisão de pesquisa em inteligência artificial.",
-    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "Bloomberg",
-    timestamp: "há 31 minutos",
-    sources: 31,
-  },
-  {
-    id: "3",
-    title: "Google em negociações com Anthropic sobre acordo de nuvem no valor de dezenas de bilhões",
-    description: "Parceria estratégica pode transformar o mercado de IA corporativa.",
-    image: "https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=800&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "Reuters",
-    timestamp: "há 47 minutos",
-    sources: 47,
-  },
-  {
-    id: "4",
-    title: "A IA pode tornar civilizações alienígenas indetectáveis",
-    description: "Pesquisadores sugerem que inteligência artificial avançada pode explicar o paradoxo de Fermi.",
-    image: "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?w=800&h=600&fit=crop",
-    category: "Ciência",
-    source: "Nature",
-    timestamp: "há 37 minutos",
-    sources: 37,
-  },
-  {
-    id: "5",
-    title: "Apple apela de decisão de desacato sobre comissões da App Store",
-    description: "Disputa legal continua sobre taxas cobradas de desenvolvedores.",
-    image: "https://images.unsplash.com/photo-1621768216002-5ac171876625?w=800&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "The Verge",
-    timestamp: "há 26 minutos",
-    sources: 42,
-  },
-  {
-    id: "6",
-    title: "Microsoft planeja 4.000 vagas de empregos em centro de expansão de dados",
-    description: "Investimento bilionário em infraestrutura de nuvem e IA.",
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "CNBC",
-    timestamp: "há 21 minutos",
-    sources: 21,
-  },
-  {
-    id: "7",
-    title: "Cientistas chineses estendem vida útil de bateria de lítio para 9.000 horas",
-    description: "Avanço pode revolucionar veículos elétricos e armazenamento de energia.",
-    image: "https://images.unsplash.com/photo-1609880173800-711f2738ff1e?w=800&h=600&fit=crop",
-    category: "Ciência",
-    source: "Science Daily",
-    timestamp: "há 3 horas",
-    sources: 55,
-  },
-  {
-    id: "8",
-    title: "Alibaba revela modelos de IA para desafiar o GPT-5",
-    description: "Nova família de modelos Qwen promete performance superior em múltiplas tarefas.",
-    image: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "TechCrunch",
-    timestamp: "há 41 minutos",
-    sources: 41,
-  },
-  {
-    id: "9",
-    title: "Ouro e prata despencam na queda mais acentuada desde 2013",
-    description: "Metais preciosos sofrem com fortalecimento do dólar e mudanças na política monetária.",
-    image: "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=800&h=600&fit=crop",
-    category: "Finanças",
-    source: "Financial Times",
-    timestamp: "há 44 minutos",
-    sources: 44,
-  },
-];
-
-const featuredNews = [
-  {
-    id: "10",
-    title: "DeepSeek revela modelo OCR com compressão de texto 20x",
-    description: "Modelo de código aberto processa mais de 200.000 páginas diariamente em uma única GPU.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=600&fit=crop",
-    category: "Tecnologia",
-    source: "ArXiv",
-    timestamp: "Publicado 21 de out. de 2025",
-    sources: 36,
-  },
-  {
-    id: "11",
-    title: "Nasa reabre contrato lunar devido a atrasos da SpaceX",
-    description: "Agência espacial busca alternativas para missão Artemis após cronograma revisado.",
-    image: "https://images.unsplash.com/photo-1516849677043-ef67c9557e16?w=1200&h=600&fit=crop",
-    category: "Ciência",
-    source: "Space.com",
-    timestamp: "há 18 horas",
-    sources: 50,
-  },
-];
-
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("for-you");
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Combine all articles for FastNews
-  const allArticles = [heroArticle, ...newsArticles, ...featuredNews];
+  // Fetch articles from API
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch("/api/articles?limit=20&sort=publishedAt&order=desc");
+        if (!res.ok) throw new Error("Failed to fetch articles");
+        
+        const data = await res.json();
+        setArticles(data || []);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
+
+  // Transform articles to match component format
+  const transformedArticles = articles.map(article => ({
+    id: article.id.toString(),
+    title: article.title,
+    description: article.description,
+    image: article.imageUrl,
+    category: article.category,
+    source: article.source,
+    timestamp: formatTimestamp(article.publishedAt || article.createdAt),
+    sources: Math.floor(Math.random() * 50) + 10, // Mock sources count
+  }));
+
+  const heroArticle = transformedArticles[0] || null;
+  const newsArticles = transformedArticles.slice(1);
 
   // Filter articles based on selected category
   const filteredArticles = useMemo(() => {
@@ -149,7 +65,7 @@ export default function Home() {
       tech: "Tecnologia",
       finance: "Finanças",
       sports: "Esportes",
-      entertainment: "Entretenimento"
+      entertainment: "Entretenimento",
     };
     
     const targetCategory = categoryMap[selectedCategory];
@@ -159,88 +75,93 @@ export default function Home() {
       article.category.toLowerCase().includes(targetCategory.toLowerCase()) ||
       targetCategory.toLowerCase().includes(article.category.toLowerCase())
     );
-  }, [selectedCategory]);
+  }, [selectedCategory, newsArticles]);
 
   const displayArticles = filteredArticles.length > 0 ? filteredArticles : newsArticles;
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Carregando notícias...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <NewsHeader articles={allArticles} />
+      <NewsHeader articles={transformedArticles} />
       <CategoryFilter onCategoryChange={setSelectedCategory} />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Top Banner Ad - Horizontal */}
+        {/* Top Banner Ad */}
         <div className="mb-8">
           <AdBanner variant="horizontal" size="medium" />
         </div>
 
-        {/* Hero Section - Layout: 1 Large Left + 3 Horizontal Middle + Widget Right */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Main Hero Article - Takes 5 columns */}
-            <div className="lg:col-span-5">
-              <NewsCard {...heroArticle} variant="hero" />
-            </div>
-            
-            {/* 3 Horizontal Articles with Image on Right - Takes 4 columns */}
-            <div className="lg:col-span-4 flex flex-col gap-4">
-              {displayArticles.slice(0, 3).map((article) => (
-                <Link 
-                  key={article.id} 
-                  href={`/article/${article.id}`}
-                  className="group flex gap-3 bg-card rounded-lg border hover:border-primary/50 transition-all overflow-hidden"
-                >
-                  {/* Content on Left */}
-                  <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
-                    <div>
-                      <Badge variant="secondary" className="mb-2 text-xs">
-                        {article.category}
-                      </Badge>
-                      <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2">
-                        {article.title}
-                      </h3>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{article.timestamp}</span>
+        {/* Hero Section */}
+        {heroArticle && (
+          <div className="mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-5">
+                <NewsCard {...heroArticle} variant="hero" />
+              </div>
+              
+              <div className="lg:col-span-4 flex flex-col gap-4">
+                {displayArticles.slice(0, 3).map((article) => (
+                  <Link 
+                    key={article.id} 
+                    href={`/article/${article.id}`}
+                    className="group flex gap-3 bg-card rounded-lg border hover:border-primary/50 transition-all overflow-hidden"
+                  >
+                    <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
+                      <div>
+                        <Badge variant="secondary" className="mb-2 text-xs">
+                          {article.category}
+                        </Badge>
+                        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                          {article.title}
+                        </h3>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Link2 className="w-3 h-3" />
-                        <span>{article.sources} fontes</span>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-2">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{article.timestamp}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Link2 className="w-3 h-3" />
+                          <span>{article.sources} fontes</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Square Image on Right */}
-                  <div className="relative w-24 h-24 flex-shrink-0">
-                    <Image
-                      src={article.image}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    
+                    <div className="relative w-24 h-24 flex-shrink-0">
+                      <Image
+                        src={article.image}
+                        alt={article.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Link>
+                ))}
+              </div>
 
-            {/* VEJA BEM Widget - Takes 3 columns */}
-            <div className="lg:col-span-3">
-              <VejaBemWidget />
+              <div className="lg:col-span-3">
+                <VejaBemWidget />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Ad Banner after Hero */}
         <div className="mb-8">
           <AdBanner variant="horizontal" size="small" />
         </div>
 
-        {/* Opinion Section */}
         <OpinionSection />
 
-        {/* Top Stories - Mixed Layout with Sidebar Ad */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
             {displayArticles.slice(3, 6).map((article) => (
@@ -252,17 +173,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Featured Row - Horizontal Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {displayArticles.slice(6, 8).map((article) => (
             <NewsCard key={article.id} {...article} variant="compact" />
           ))}
         </div>
 
-        {/* Poderes Section */}
         <PoderesSection />
 
-        {/* Video Ad Section - Grid Format (Cards) */}
         <div className="mb-8 py-4">
           <div className="mb-6">
             <h3 className="text-xl font-bold mb-2">Publicitários</h3>
@@ -271,31 +189,29 @@ export default function Home() {
           <VideoAdBanner variant="grid" />
         </div>
 
-        {/* Main Content Grid with Square Ad */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          {displayArticles.slice(0, 2).map((article) => (
+          {displayArticles.slice(8, 10).map((article) => (
             <NewsCard key={article.id} {...article} variant="standard" />
           ))}
           <div className="flex items-start">
             <AdBanner variant="square" size="large" />
           </div>
-          <NewsCard {...displayArticles[2]} variant="standard" />
+          {displayArticles[10] && (
+            <NewsCard {...displayArticles[10]} variant="standard" />
+          )}
         </div>
 
-        {/* Horizontal Ad */}
         <div className="mb-8">
           <AdBanner variant="horizontal" size="small" />
         </div>
 
-        {/* Geral Section */}
         <GeralSection />
 
-        {/* Destaques Section with Sidebar Ad */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6">Destaques</h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-              {featuredNews.map((article) => (
+              {displayArticles.slice(11, 13).map((article) => (
                 <NewsCard key={article.id} {...article} variant="compact" />
               ))}
             </div>
@@ -305,36 +221,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Polícia Section */}
         <PoliciaSection />
 
-        {/* More Stories Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {displayArticles.slice(3, 6).map((article) => (
+          {displayArticles.slice(13, 16).map((article) => (
             <NewsCard key={`more-${article.id}`} {...article} variant="standard" />
           ))}
         </div>
 
-        {/* Mid-content Banner */}
         <div className="mb-8">
           <AdBanner variant="horizontal" size="medium" />
         </div>
 
-        {/* Final Compact Section with Inline Ads */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {displayArticles.slice(6, 8).map((article) => (
+          {displayArticles.slice(16, 18).map((article) => (
             <NewsCard key={`final-${article.id}`} {...article} variant="compact" />
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          <AdBanner variant="square" size="medium" />
-          {displayArticles.slice(0, 2).map((article) => (
-            <NewsCard key={`final2-${article.id}`} {...article} variant="compact" />
-          ))}
-        </div>
-
-        {/* Bottom Banner Ad */}
         <div className="mb-8">
           <AdBanner variant="horizontal" size="large" />
         </div>
@@ -386,4 +290,21 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+// Helper function to format timestamp
+function formatTimestamp(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "há poucos segundos";
+  if (diffMins < 60) return `há ${diffMins} minuto${diffMins > 1 ? "s" : ""}`;
+  if (diffHours < 24) return `há ${diffHours} hora${diffHours > 1 ? "s" : ""}`;
+  if (diffDays < 7) return `há ${diffDays} dia${diffDays > 1 ? "s" : ""}`;
+  
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 }

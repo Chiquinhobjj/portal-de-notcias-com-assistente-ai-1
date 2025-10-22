@@ -21,6 +21,7 @@ import {
   User,
   LogOut,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import SidebarAssistant from "./SidebarAssistant";
@@ -224,206 +225,93 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const currentData = rotatingData[currentDataIndex];
 
   return (
-    <>
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-2 md:gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center flex-shrink-0">
-              <div className="relative w-24 md:w-32 h-8 md:h-10">
-                <Image
-                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Ativo-6-4x-1761161927495.png"
-                  alt="IspiAI"
-                  fill
-                  className="object-contain object-left dark:hidden"
-                  priority
-                />
-                <Image
-                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761161927239.png"
-                  alt="IspiAI"
-                  fill
-                  className="object-contain object-left hidden dark:block"
-                  priority
-                />
-              </div>
-            </Link>
-
-            {/* CTA Buttons - XomanoAI e IspiAI em 30s */}
-            <div className="flex-1 flex items-center justify-center gap-2 md:gap-3">
-              <Button
-                size="sm"
-                className="shadow-md hover:shadow-lg transition-all gap-1 md:gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm px-2 md:px-4"
-                onClick={() => setAssistantOpen(true)}
-              >
-                <Bot className="w-4 h-4 md:w-5 md:h-5" />
-                <span className="hidden sm:inline">XomanoAI</span>
-              </Button>
-              
-              <Button
-                size="sm"
-                className="shadow-md hover:shadow-lg transition-all gap-1 md:gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm px-2 md:px-4"
-                onClick={() => setFastNewsOpen(true)}
-              >
-                <Zap className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" />
-                <span className="hidden sm:inline">IspiAI em 30s</span>
-              </Button>
+    <header className="border-b bg-card sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="text-2xl font-bold bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">
+              IspiAI
             </div>
+          </Link>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="h-8 w-8 md:h-10 md:w-10"
-              >
-                <Sun className="h-4 w-4 md:h-5 md:w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-4 w-4 md:h-5 md:w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
-              </Button>
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFastNewsOpen(true)}
+              className="gap-2"
+            >
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">IspiAI em 30s</span>
+            </Button>
 
-              <UserPreferences />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAssistantOpen(true)}
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">XomanoAI</span>
+            </Button>
 
-              {/* Auth UI */}
-              {isPending ? (
-                <div className="h-8 w-8 md:h-10 md:w-10 flex items-center justify-center">
-                  <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : session?.user ? (
+            {session?.user ? (
+              <>
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span className="hidden sm:inline">Admin</span>
+                  </Button>
+                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="h-8 w-8 md:h-10 md:w-10 rounded-full p-0"
-                    >
-                      <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                        <AvatarFallback className="bg-gradient-to-br from-[#0EA5E9] to-[#0C4A6E] text-white font-semibold text-xs md:text-sm">
-                          {getUserInitials(session.user.name)}
-                        </AvatarFallback>
-                      </Avatar>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] flex items-center justify-center text-white text-xs font-medium">
+                        {session.user.name?.[0]?.toUpperCase()}
+                      </div>
+                      <span className="hidden md:inline">{session.user.name}</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {session.user.name}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {session.user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Perfil</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem disabled>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Configurações</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      disabled={isLoggingOut}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>{isLoggingOut ? "Saindo..." : "Sair"}</span>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sair
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/login")}
-                    className="h-8 md:h-10 text-xs md:text-sm"
-                  >
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline" size="sm">
                     Entrar
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push("/register")}
-                    className="h-8 md:h-10 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm"
-                  >
+                </Link>
+                <Link href="/register">
+                  <Button size="sm">
                     Criar Conta
                   </Button>
-                </div>
-              )}
-            </div>
+                </Link>
+              </>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Rotating Data Ticker */}
-        <div className="border-t bg-gradient-to-r from-muted/30 via-muted/50 to-muted/30">
-          <div className="container mx-auto px-4 py-2.5 overflow-hidden">
-            <div className="flex items-center justify-center gap-4">
-              <div
-                className={`flex items-center gap-2.5 transition-all duration-300 ${
-                  isAnimating
-                    ? "opacity-0 scale-95 translate-y-2"
-                    : "opacity-100 scale-100 translate-y-0"
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  {currentData.icon}
-                  <span className="font-semibold text-sm">{currentData.label}</span>
-                </div>
-                
-                <div className="h-4 w-px bg-border" />
-                
-                <span className="font-bold text-sm">{currentData.value}</span>
-                
-                {currentData.change && (
-                  <>
-                    <span className={`font-semibold text-sm ${currentData.changeColor}`}>
-                      {currentData.change}
-                    </span>
-                  </>
-                )}
-                
-                {currentData.sublabel && (
-                  <>
-                    <div className="h-4 w-px bg-border hidden sm:block" />
-                    <span className="text-xs text-muted-foreground hidden sm:inline">
-                      {currentData.sublabel}
-                    </span>
-                  </>
-                )}
-              </div>
-              
-              {/* Progress Indicator */}
-              <div className="flex items-center gap-1 ml-3">
-                {rotatingData.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      index === currentDataIndex
-                        ? "bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] w-8"
-                        : "bg-muted-foreground/20 w-1.5"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <SidebarAssistant 
-        open={assistantOpen} 
-        onOpenChange={setAssistantOpen}
-        onFastNewsOpen={() => setFastNewsOpen(true)}
-      />
-      
+      {/* Fast News Dialog */}
       <FastNews
         articles={articles}
         isOpen={fastNewsOpen}
         onClose={() => setFastNewsOpen(false)}
       />
-    </>
+
+      {/* Assistant Sidebar */}
+      <SidebarAssistant 
+        open={assistantOpen} 
+        onOpenChange={setAssistantOpen}
+        onFastNewsOpen={() => setFastNewsOpen(true)}
+      />
+    </header>
   );
 }
