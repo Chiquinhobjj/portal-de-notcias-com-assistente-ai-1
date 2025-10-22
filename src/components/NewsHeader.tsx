@@ -244,7 +244,7 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               className="gap-2"
             >
               <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">IspiAI em 30s</span>
+              <span className="hidden sm:inline">IspiAI shorts</span>
             </Button>
 
             <Button

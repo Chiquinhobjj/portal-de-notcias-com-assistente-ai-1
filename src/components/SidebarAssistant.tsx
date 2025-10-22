@@ -96,7 +96,7 @@ export default function SidebarAssistant({ open, onOpenChange, onFastNewsOpen }:
                   variant="ghost"
                   size="icon"
                   onClick={onFastNewsOpen}
-                  title="IspiAI em 30s"
+                  title="IspiAI shorts"
                 >
                   <Zap className="h-4 w-4" fill="currentColor" />
                 </Button>
