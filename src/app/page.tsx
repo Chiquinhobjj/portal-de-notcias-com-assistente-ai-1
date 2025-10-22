@@ -6,6 +6,7 @@ import CategoryFilter from "@/components/CategoryFilter";
 import NewsCard from "@/components/NewsCard";
 import { AdBanner } from "@/components/AdBanner";
 import { VideoAdBanner } from "@/components/VideoAdBanner";
+import { VejaBemWidget } from "@/components/VejaBemWidget";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Link2 } from "lucide-react";
 import Image from "next/image";
@@ -143,16 +144,16 @@ export default function Home() {
           <AdBanner variant="horizontal" size="medium" />
         </div>
 
-        {/* Hero Section - New Layout: 1 Large Left + 3 Horizontal Right */}
+        {/* Hero Section - Layout: 1 Large Left + 3 Horizontal Middle + Widget Right */}
         <div className="mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Hero Article - Takes 2 columns */}
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Main Hero Article - Takes 5 columns */}
+            <div className="lg:col-span-5">
               <NewsCard {...heroArticle} variant="hero" />
             </div>
             
-            {/* 3 Horizontal Articles with Image on Right */}
-            <div className="flex flex-col gap-4">
+            {/* 3 Horizontal Articles with Image on Right - Takes 4 columns */}
+            <div className="lg:col-span-4 flex flex-col gap-4">
               {newsArticles.slice(0, 3).map((article) => (
                 <Link 
                   key={article.id} 
@@ -192,6 +193,11 @@ export default function Home() {
                   </div>
                 </Link>
               ))}
+            </div>
+
+            {/* VEJA BEM Widget - Takes 3 columns */}
+            <div className="lg:col-span-3">
+              <VejaBemWidget />
             </div>
           </div>
         </div>
