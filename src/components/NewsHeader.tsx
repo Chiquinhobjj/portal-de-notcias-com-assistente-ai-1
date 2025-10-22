@@ -180,6 +180,11 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auto-rotate data with smooth animation
   useEffect(() => {
@@ -225,11 +230,14 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const currentData = rotatingData[currentDataIndex];
 
   return (
-    <header className="border-b bg-card sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+    <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0EA5E9] to-[#0C4A6E] flex items-center justify-center shadow-md">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
             <div className="text-2xl font-bold bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">
               IspiAI
             </div>
@@ -257,6 +265,25 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               <span className="hidden sm:inline">XomanoAI</span>
             </Button>
 
+            {/* Dark Mode Toggle */}
+            {mounted && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="gap-2"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {theme === "dark" ? "Light" : "Dark"}
+                </span>
+              </Button>
+            )}
+
             {session?.user ? (
               <>
                 <Link href="/admin">
@@ -275,8 +302,16 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      Sair
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium">{session.user.name}</p>
+                        <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} disabled={isLoggingOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Sair</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -289,7 +324,7 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button size="sm">
+                  <Button size="sm" className="bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E]">
                     Criar Conta
                   </Button>
                 </Link>

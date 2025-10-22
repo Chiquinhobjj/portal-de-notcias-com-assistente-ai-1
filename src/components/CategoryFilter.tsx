@@ -40,7 +40,7 @@ export default function CategoryFilter({ onCategoryChange }: CategoryFilterProps
   };
 
   return (
-    <div className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-[104px] md:top-[120px] z-30">
+    <div className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-[73px] z-40">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((category) => {
