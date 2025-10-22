@@ -1,0 +1,22 @@
+<svg width="800" height="200" viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Eye icon -->
+  <g transform="translate(0, 20)">
+    <!-- Outer eye shape -->
+    <path d="M 20 80 Q 60 20, 120 80 Q 100 120, 80 120 Q 60 120, 40 80 Q 20 100, 20 80 Z" 
+          fill="none" stroke="#0EA5E9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Inner eye shape -->
+    <ellipse cx="70" cy="75" rx="30" ry="40" fill="none" stroke="#0EA5E9" stroke-width="8"/>
+    <!-- Star in center -->
+    <path d="M 70 60 L 75 70 L 85 70 L 77 77 L 80 87 L 70 80 L 60 87 L 63 77 L 55 70 L 65 70 Z" 
+          fill="#0EA5E9"/>
+  </g>
+  
+  <!-- Text: IspiAI -->
+  <g transform="translate(160, 100)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FFFFFF">Ispi</text>
+    <text x="230" y="0" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#0EA5E9">AI</text>
+  </g>
+  
+  <!-- Underline -->
+  <rect x="160" y="115" width="200" height="8" fill="#0EA5E9" rx="4"/>
+</svg>

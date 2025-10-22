@@ -249,7 +249,22 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-bold mb-4 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">IspiAI</h3>
+              <div className="mb-4">
+                <Image
+                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_padrao-4x-1761167472574.png"
+                  alt="IspiAI Logo"
+                  width={120}
+                  height={30}
+                  className="h-8 w-auto object-contain dark:hidden"
+                />
+                <Image
+                  src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761167472564.png"
+                  alt="IspiAI Logo"
+                  width={120}
+                  height={30}
+                  className="h-8 w-auto object-contain hidden dark:block"
+                />
+              </div>
               <p className="text-sm text-muted-foreground">
                 Portal mundial que começa por Mato Grosso. Ispia o que importa com notícias rápidas e IA contextual.
               </p>

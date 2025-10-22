@@ -89,7 +89,7 @@ export default function RegisterPage() {
         <div className="max-w-md space-y-6">
           <div className="relative w-48 h-16 mx-auto mb-8">
             <Image
-              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761161927239.png"
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761167472564.png"
               alt="IspiAI"
               fill
               className="object-contain"

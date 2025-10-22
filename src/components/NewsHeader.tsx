@@ -234,13 +234,26 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0EA5E9] to-[#0C4A6E] flex items-center justify-center shadow-md">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <div className="text-2xl font-bold bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">
-              IspiAI
-            </div>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            {mounted && (
+              <div className="relative h-10 w-auto">
+                <Image
+                  src={
+                    theme === "dark"
+                      ? "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761167472564.png"
+                      : "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_padrao-4x-1761167472574.png"
+                  }
+                  alt="IspiAI Logo"
+                  width={180}
+                  height={40}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+              </div>
+            )}
+            {!mounted && (
+              <div className="h-10 w-[180px] bg-muted animate-pulse rounded" />
+            )}
           </Link>
 
           {/* Actions */}
