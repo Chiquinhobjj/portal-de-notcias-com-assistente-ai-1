@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sun,
   Moon,
-  MessageSquare,
   TrendingUp,
   TrendingDown,
   Cloud,
@@ -182,10 +181,10 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
             {/* Logo - Normal para light, Branca para dark */}
-            <Link href="/" className="flex items-center">
-              <div className="relative w-32 h-10 flex-shrink-0">
+            <Link href="/" className="flex items-center flex-shrink-0">
+              <div className="relative w-24 md:w-32 h-8 md:h-10">
                 {/* Logo Normal - Light Mode */}
                 <Image
                   src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/Ativo-6-4x-1761161927495.png"
@@ -205,48 +204,38 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               </div>
             </Link>
 
-            {/* CTA Buttons - XomanoAI e IspiAI em 30s */}
-            <div className="flex-1 max-w-2xl hidden md:flex items-center justify-center gap-3">
+            {/* CTA Buttons - XomanoAI e IspiAI em 30s - Sempre Visíveis */}
+            <div className="flex-1 flex items-center justify-center gap-2 md:gap-3">
               <Button
-                size="lg"
-                className="shadow-md hover:shadow-lg transition-all gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
+                size="sm"
+                className="shadow-md hover:shadow-lg transition-all gap-1 md:gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm px-2 md:px-4"
                 onClick={() => setAssistantOpen(true)}
               >
-                <Bot className="w-5 h-5" />
-                XomanoAI
+                <Bot className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">XomanoAI</span>
               </Button>
               
               <Button
-                size="lg"
-                className="shadow-md hover:shadow-lg transition-all gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9]"
+                size="sm"
+                className="shadow-md hover:shadow-lg transition-all gap-1 md:gap-2 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-xs md:text-sm px-2 md:px-4"
                 onClick={() => setFastNewsOpen(true)}
               >
-                <Zap className="w-5 h-5" fill="currentColor" />
-                IspiAI em 30s
+                <Zap className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" />
+                <span className="hidden sm:inline">IspiAI em 30s</span>
               </Button>
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="h-8 w-8 md:h-10 md:w-10"
               >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <Sun className="h-4 w-4 md:h-5 md:w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 md:h-5 md:w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setAssistantOpen(true)}
-                className="relative md:hidden"
-                title="XomanoAI - Assistente Inteligente"
-              >
-                <MessageSquare className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
               </Button>
 
               <UserPreferences />
