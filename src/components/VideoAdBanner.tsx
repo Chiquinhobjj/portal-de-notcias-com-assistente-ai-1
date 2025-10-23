@@ -19,7 +19,7 @@ const videoAds = [
     description: "Advocacia & Consultoria Jurídica Empresarial",
     thumbnail: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/c222ccad-9266-435c-a2ab-e37ad912cb72/generated_images/professional-video-advertisement-thumbna-1a96ed57-20251023110939.jpg",
     color: "from-blue-600/30 to-cyan-600/30",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ const videoAds = [
     description: "Melhor Gastronomia de Cuiabá - Restaurante & Eventos",
     thumbnail: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/c222ccad-9266-435c-a2ab-e37ad912cb72/generated_images/video-ad-thumbnail-for-brazilian-local-b-de5e4fc5-20251023110942.jpg",
     color: "from-amber-600/30 to-orange-600/30",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    youtubeUrl: "https://www.youtube.com/watch?v=kJQP7kiw5Fk"
   },
   {
     id: 3,
@@ -35,7 +35,7 @@ const videoAds = [
     description: "Crédito Agronegócio - Soluções Financeiras para o Campo",
     thumbnail: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/c222ccad-9266-435c-a2ab-e37ad912cb72/generated_images/corporate-video-ad-thumbnail-banco-centr-ad362c4d-20251023110941.jpg",
     color: "from-green-600/30 to-emerald-600/30",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    youtubeUrl: "https://www.youtube.com/watch?v=yWWW8JEqW3c"
   },
   {
     id: 4,
@@ -43,9 +43,26 @@ const videoAds = [
     description: "Advocacia é Missão - Ordem dos Advogados do Brasil",
     thumbnail: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/project-uploads/c222ccad-9266-435c-a2ab-e37ad912cb72/generated_images/professional-association-video-thumbnail-17981da8-20251023110940.jpg",
     color: "from-blue-800/30 to-indigo-800/30",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    youtubeUrl: "https://www.youtube.com/watch?v=Lrj2Hq7xqQ8"
   },
 ];
+
+// Extract YouTube video ID from URL
+function getYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+}
 
 export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "carousel" }: VideoAdBannerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -123,7 +140,7 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
           </div>
         </div>
 
-        {/* Video Dialog */}
+        {/* Video Dialog with YouTube Embed */}
         <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
           <DialogContent className="max-w-4xl p-0 bg-black border-0">
             <div className="relative aspect-video w-full">
@@ -135,14 +152,24 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
               >
                 <X className="w-5 h-5" />
               </Button>
-              {selectedVideo && (
-                <iframe
-                  src={selectedVideo.videoUrl}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              )}
+              {selectedVideo && (() => {
+                const videoId = getYouTubeVideoId(selectedVideo.youtubeUrl);
+                const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : null;
+                
+                return embedUrl ? (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={selectedVideo.title}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-white">
+                    URL do vídeo inválido
+                  </div>
+                );
+              })()}
             </div>
             {selectedVideo && (
               <div className="p-4 bg-background">

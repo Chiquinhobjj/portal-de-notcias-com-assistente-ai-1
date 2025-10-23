@@ -15,6 +15,13 @@
       "when": 1761165922843,
       "tag": "0001_melted_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1761218815156,
+      "tag": "0002_shallow_rhodey",
+      "breakpoints": true
     }
   ]
 }

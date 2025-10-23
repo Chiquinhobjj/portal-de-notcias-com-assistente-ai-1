@@ -124,3 +124,38 @@ export const adminConfig = sqliteTable('admin_config', {
   description: text('description'),
   updatedAt: text('updated_at').notNull(),
 });
+
+// IspiAI TV tables
+export const videos = sqliteTable('videos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  youtubeUrl: text('youtube_url').notNull(),
+  thumbnailUrl: text('thumbnail_url').notNull(),
+  category: text('category').notNull(),
+  duration: text('duration').notNull(),
+  views: integer('views').default(0),
+  likes: integer('likes').default(0),
+  source: text('source').notNull(),
+  publishedAt: text('published_at'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const playlists = sqliteTable('playlists', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  thumbnailUrl: text('thumbnail_url').notNull(),
+  videoCount: integer('video_count').default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const playlistVideos = sqliteTable('playlist_videos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  playlistId: integer('playlist_id').notNull().references(() => playlists.id, { onDelete: 'cascade' }),
+  videoId: integer('video_id').notNull().references(() => videos.id, { onDelete: 'cascade' }),
+  position: integer('position').notNull(),
+  createdAt: text('created_at').notNull(),
+});
