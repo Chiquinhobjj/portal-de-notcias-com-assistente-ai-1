@@ -11,8 +11,7 @@ import {
   MessageCircle,
   MoreHorizontal,
   Volume2,
-  VolumeX,
-  ExternalLink
+  VolumeX
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -97,17 +96,6 @@ export default function WatchPage() {
     }
   }, [currentVideo]);
 
-  const handleOpenInYouTube = () => {
-    if (currentVideo) {
-      const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
-      if (videoId) {
-        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        window.open(youtubeUrl, "_blank", "noopener,noreferrer");
-        toast.success("Abrindo no YouTube...");
-      }
-    }
-  };
-
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -182,16 +170,6 @@ export default function WatchPage() {
             className="text-white hover:bg-white/20"
           >
             <ArrowLeft className="h-5 w-5" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleOpenInYouTube}
-            className="text-white hover:bg-white/20 gap-2"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Abrir no YouTube
           </Button>
         </div>
       </div>

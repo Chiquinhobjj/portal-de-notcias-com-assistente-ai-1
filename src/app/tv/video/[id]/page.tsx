@@ -124,7 +124,7 @@ export default function VideoPage() {
   }
 
   const videoId = getYouTubeVideoId(video.youtubeUrl);
-  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : null;
+  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&controls=1` : null;
 
   return (
     <div className="min-h-screen bg-background">
