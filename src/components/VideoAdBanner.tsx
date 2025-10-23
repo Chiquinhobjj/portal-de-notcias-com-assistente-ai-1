@@ -81,8 +81,26 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
   };
 
   const handleVideoClick = (ad: typeof videoAds[0]) => {
-    setSelectedVideo(ad);
-    toast.info(`Reproduzindo: ${ad.title}`);
+    const videoId = getYouTubeVideoId(ad.youtubeUrl);
+    
+    if (!videoId) {
+      toast.error("URL do vídeo inválida");
+      return;
+    }
+
+    // Check if we're in an iframe
+    const isInIframe = window.self !== window.top;
+    const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    
+    if (isInIframe) {
+      // Open in new tab if in iframe (like the preview environment)
+      window.open(youtubeUrl, "_blank", "noopener,noreferrer");
+      toast.info(`Abrindo: ${ad.title}`);
+    } else {
+      // Open in modal if not in iframe
+      setSelectedVideo(ad);
+      toast.info(`Reproduzindo: ${ad.title}`);
+    }
   };
 
   // Grid variant - cards layout
@@ -140,7 +158,7 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
           </div>
         </div>
 
-        {/* Video Dialog with YouTube Embed */}
+        {/* Video Dialog with YouTube Embed - Only show if not in iframe */}
         <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
           <DialogContent className="max-w-4xl p-0 bg-black border-0">
             <div className="relative aspect-video w-full">

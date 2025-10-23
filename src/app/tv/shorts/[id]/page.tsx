@@ -17,8 +17,7 @@ import {
   VolumeX,
   Send,
   ThumbsUp,
-  Play,
-  Pause
+  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -111,11 +110,15 @@ export default function ShortsPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [playing, setPlaying] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>(mockComments);
+  const [isInIframe, setIsInIframe] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLIFrameElement>(null);
+
+  // Check if we're in an iframe
+  useEffect(() => {
+    setIsInIframe(window.self !== window.top);
+  }, []);
 
   // Fetch videos
   useEffect(() => {
@@ -153,6 +156,21 @@ export default function ShortsPlayerPage() {
     }
   }, [currentVideo]);
 
+  // If in iframe and video is ready, redirect to YouTube
+  useEffect(() => {
+    if (isInIframe && currentVideo) {
+      const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
+      if (videoId) {
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        window.open(youtubeUrl, "_blank", "noopener,noreferrer");
+        toast.info("Abrindo vídeo no YouTube em nova aba...");
+        setTimeout(() => {
+          router.push("/tv");
+        }, 2000);
+      }
+    }
+  }, [isInIframe, currentVideo, router]);
+
   const navigateToVideo = (direction: "next" | "prev") => {
     setCurrentIndex(prev => {
       if (direction === "next" && prev < videos.length - 1) {
@@ -182,7 +200,6 @@ export default function ShortsPlayerPage() {
     setCommentText("");
     toast.success("Comentário adicionado!");
     
-    // Scroll to bottom
     setTimeout(() => {
       commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
@@ -200,6 +217,17 @@ export default function ShortsPlayerPage() {
     }
   };
 
+  const handleOpenInYouTube = () => {
+    if (currentVideo) {
+      const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
+      if (videoId) {
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        window.open(youtubeUrl, "_blank", "noopener,noreferrer");
+        toast.success("Abrindo no YouTube...");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-black">
@@ -212,6 +240,30 @@ export default function ShortsPlayerPage() {
   }
 
   if (!currentVideo) return null;
+
+  // If in iframe, show message
+  if (isInIframe) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black">
+        <div className="text-center max-w-md p-8">
+          <ExternalLink className="h-16 w-16 text-white mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Abrindo vídeo no YouTube
+          </h2>
+          <p className="text-white/80 mb-6">
+            Os vídeos são reproduzidos no YouTube para melhor experiência.
+          </p>
+          <Button
+            onClick={() => router.push("/tv")}
+            variant="outline"
+            className="text-white border-white hover:bg-white hover:text-black"
+          >
+            Voltar para IspiAI TV
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
   const embedUrl = videoId 
@@ -243,14 +295,25 @@ export default function ShortsPlayerPage() {
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMuted(!muted)}
-            className="text-white hover:bg-white/20"
-          >
-            {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleOpenInYouTube}
+              className="text-white hover:bg-white/20"
+              title="Abrir no YouTube"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMuted(!muted)}
+              className="text-white hover:bg-white/20"
+            >
+              {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -260,7 +323,6 @@ export default function ShortsPlayerPage() {
         <div className="flex-1 relative flex items-center justify-center bg-black">
           {embedUrl ? (
             <iframe
-              ref={videoRef}
               key={currentVideo.id}
               src={embedUrl}
               className="w-full h-full"
