@@ -22,11 +22,11 @@ import {
   LogOut,
   Settings,
   MessageSquare,
+  Tv,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import SidebarAssistant from "./SidebarAssistant";
 import { UserPreferences } from "./UserPreferences";
-import { FastNews } from "./FastNews";
 import Image from "next/image";
 import { authClient, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -176,7 +176,6 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
   const [assistantOpen, setAssistantOpen] = useState(false);
-  const [fastNewsOpen, setFastNewsOpen] = useState(false);
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -258,15 +257,29 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFastNewsOpen(true)}
-              className="gap-2"
-            >
-              <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">IspiAI shorts</span>
-            </Button>
+            {/* IspiAI Shorts button */}
+            <Link href="/shorts">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                <span className="hidden sm:inline">IspiAI shorts</span>
+              </Button>
+            </Link>
+
+            {/* IspiAI TV button */}
+            <Link href="/tv">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Tv className="h-4 w-4" />
+                <span className="hidden sm:inline">IspiAI TV</span>
+              </Button>
+            </Link>
 
             <Button
               variant="outline"
@@ -347,18 +360,11 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
         </div>
       </div>
 
-      {/* Fast News Dialog */}
-      <FastNews
-        articles={articles}
-        isOpen={fastNewsOpen}
-        onClose={() => setFastNewsOpen(false)}
-      />
-
       {/* Assistant Sidebar */}
       <SidebarAssistant 
         open={assistantOpen} 
         onOpenChange={setAssistantOpen}
-        onFastNewsOpen={() => setFastNewsOpen(true)}
+        onFastNewsOpen={() => router.push("/shorts")}
       />
     </header>
   );
