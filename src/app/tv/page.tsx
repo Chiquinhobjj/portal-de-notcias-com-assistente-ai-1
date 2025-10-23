@@ -174,7 +174,7 @@ export default function IspiAITV() {
                 {sortedVideos.map((video) => (
                   <Link
                     key={video.id}
-                    href={`/tv/video/${video.id}`}
+                    href={`/tv/watch/${video.id}`}
                     className="group"
                   >
                     <div className="space-y-2">
@@ -236,7 +236,7 @@ export default function IspiAITV() {
                 {likedVideos.map((video) => (
                   <Link
                     key={video.id}
-                    href={`/tv/video/${video.id}`}
+                    href={`/tv/watch/${video.id}`}
                     className="group"
                   >
                     <div className="space-y-2">
