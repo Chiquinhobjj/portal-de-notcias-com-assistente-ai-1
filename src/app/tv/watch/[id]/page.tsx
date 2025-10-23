@@ -55,12 +55,6 @@ export default function WatchPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [isInIframe, setIsInIframe] = useState(false);
-
-  // Check if we're in an iframe
-  useEffect(() => {
-    setIsInIframe(window.self !== window.top);
-  }, []);
 
   // Fetch all videos
   useEffect(() => {
@@ -103,23 +97,6 @@ export default function WatchPage() {
     }
   }, [currentVideo]);
 
-  // If in iframe and video is ready, redirect to YouTube
-  useEffect(() => {
-    if (isInIframe && currentVideo) {
-      const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
-      if (videoId) {
-        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        // Open in new tab
-        window.open(youtubeUrl, "_blank", "noopener,noreferrer");
-        toast.info("Abrindo vídeo no YouTube em nova aba...");
-        // Redirect back to TV page after 2 seconds
-        setTimeout(() => {
-          router.push("/tv");
-        }, 2000);
-      }
-    }
-  }, [isInIframe, currentVideo, router]);
-
   const handleOpenInYouTube = () => {
     if (currentVideo) {
       const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
@@ -157,30 +134,6 @@ export default function WatchPage() {
 
   if (!currentVideo) {
     return null;
-  }
-
-  // If in iframe, show message
-  if (isInIframe) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <div className="text-center max-w-md p-8">
-          <ExternalLink className="h-16 w-16 text-white mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Abrindo vídeo no YouTube
-          </h2>
-          <p className="text-white/80 mb-6">
-            Os vídeos são reproduzidos no YouTube para melhor experiência.
-          </p>
-          <Button
-            onClick={() => router.push("/tv")}
-            variant="outline"
-            className="text-white border-white hover:bg-white hover:text-black"
-          >
-            Voltar para IspiAI TV
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
