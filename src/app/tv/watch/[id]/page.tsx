@@ -57,7 +57,7 @@ export default function WatchPage() {
   const [liked, setLiked] = useState(false);
   const [muted, setMuted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const isScrollingRef = useRef(false);
+  const lastScrollTimeRef = useRef(0);
   const touchStartRef = useRef(0);
 
   // Fetch all videos
@@ -89,7 +89,7 @@ export default function WatchPage() {
 
   const currentVideo = videos[currentIndex];
 
-  // Increment view count
+  // Increment view count and update URL
   useEffect(() => {
     if (currentVideo) {
       fetch(`/api/admin/videos/${currentVideo.id}/increment-views`, {
@@ -101,24 +101,29 @@ export default function WatchPage() {
     }
   }, [currentVideo]);
 
-  // Handle navigation
+  // Handle navigation with throttle
   const navigateToVideo = useCallback((direction: "next" | "prev") => {
-    if (isScrollingRef.current) return;
+    const now = Date.now();
+    const timeSinceLastScroll = now - lastScrollTimeRef.current;
     
-    isScrollingRef.current = true;
-    
-    if (direction === "next" && currentIndex < videos.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      setLiked(false);
-    } else if (direction === "prev" && currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-      setLiked(false);
+    // Throttle to prevent rapid navigation (300ms cooldown)
+    if (timeSinceLastScroll < 300) {
+      return;
     }
     
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 500);
-  }, [currentIndex, videos.length]);
+    lastScrollTimeRef.current = now;
+    
+    setCurrentIndex(prev => {
+      if (direction === "next" && prev < videos.length - 1) {
+        setLiked(false);
+        return prev + 1;
+      } else if (direction === "prev" && prev > 0) {
+        setLiked(false);
+        return prev - 1;
+      }
+      return prev;
+    });
+  }, [videos.length]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -142,44 +147,33 @@ export default function WatchPage() {
     if (!container) return;
 
     let startY = 0;
-    let isDragging = false;
 
     const handleTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
       touchStartRef.current = startY;
-      isDragging = true;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return;
-      // Prevent default scroll behavior
-      e.preventDefault();
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!isDragging) return;
-      isDragging = false;
-      
       const endY = e.changedTouches[0].clientY;
       const diff = touchStartRef.current - endY;
       const threshold = 50;
 
-      if (diff > threshold) {
-        // Swipe up - next video
-        navigateToVideo("next");
-      } else if (diff < -threshold) {
-        // Swipe down - previous video
-        navigateToVideo("prev");
+      if (Math.abs(diff) > threshold) {
+        if (diff > 0) {
+          // Swipe up - next video
+          navigateToVideo("next");
+        } else {
+          // Swipe down - previous video
+          navigateToVideo("prev");
+        }
       }
     };
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
     container.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
       container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
   }, [navigateToVideo]);
@@ -192,10 +186,12 @@ export default function WatchPage() {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       
-      if (e.deltaY > 0) {
-        navigateToVideo("next");
-      } else if (e.deltaY < 0) {
-        navigateToVideo("prev");
+      if (Math.abs(e.deltaY) > 10) {
+        if (e.deltaY > 0) {
+          navigateToVideo("next");
+        } else {
+          navigateToVideo("prev");
+        }
       }
     };
 
@@ -245,7 +241,6 @@ export default function WatchPage() {
     <div 
       ref={containerRef}
       className="fixed inset-0 bg-black overflow-hidden"
-      style={{ touchAction: "none" }}
     >
       {/* Close Button */}
       <Button
