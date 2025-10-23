@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import NewsHeader from "@/components/NewsHeader";
+import { AdBanner } from "@/components/AdBanner";
+import { VideoAdBanner } from "@/components/VideoAdBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -94,6 +96,11 @@ export default function IspiAITV() {
           <p className="text-muted-foreground">Assista aos melhores vídeos e reportagens</p>
         </div>
 
+        {/* Top Banner Ad */}
+        <div className="mb-8">
+          <AdBanner variant="horizontal" size="medium" />
+        </div>
+
         <Tabs defaultValue="videos" className="w-full">
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-muted">
@@ -176,58 +183,142 @@ export default function IspiAITV() {
               </div>
             )}
 
+            {/* Ad Banner after playlists */}
+            <div>
+              <AdBanner variant="horizontal" size="small" />
+            </div>
+
             {/* Videos Grid */}
             <div>
               <h2 className="text-xl font-bold mb-4">Vídeos</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {sortedVideos.map((video) => (
-                  <Link
-                    key={video.id}
-                    href={`/tv/watch/${video.id}`}
-                    className="group"
-                  >
-                    <div className="space-y-2">
-                      <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-muted">
-                        <Image
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          fill
-                          className="object-cover transition-transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="h-6 w-6 text-black ml-1" fill="currentColor" />
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {sortedVideos.slice(0, 12).map((video) => (
+                      <Link
+                        key={video.id}
+                        href={`/tv/watch/${video.id}`}
+                        className="group"
+                      >
+                        <div className="space-y-2">
+                          <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-muted">
+                            <Image
+                              src={video.thumbnailUrl}
+                              alt={video.title}
+                              fill
+                              className="object-cover transition-transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                              <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Play className="h-6 w-6 text-black ml-1" fill="currentColor" />
+                              </div>
+                            </div>
+                            <div className="absolute bottom-2 right-2">
+                              <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white font-medium flex items-center gap-1">
+                                <Play className="h-3 w-3" />
+                                {video.duration}
+                              </div>
+                            </div>
+                            <div className="absolute top-2 left-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {video.category}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                              {video.title}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-3 w-3" />
+                                {video.views?.toLocaleString() || 0}
+                              </span>
+                              <span>•</span>
+                              <span className="font-medium">{video.source}</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="absolute bottom-2 right-2">
-                          <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white font-medium flex items-center gap-1">
-                            <Play className="h-3 w-3" />
-                            {video.duration}
-                          </div>
-                        </div>
-                        <div className="absolute top-2 left-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {video.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {video.views?.toLocaleString() || 0}
-                          </span>
-                          <span>•</span>
-                          <span className="font-medium">{video.source}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="lg:col-span-1">
+                  <div className="sticky top-4 space-y-6">
+                    <AdBanner variant="vertical" size="large" label="Anúncio" />
+                  </div>
+                </div>
               </div>
+            </div>
+
+            {/* Video Ads Section */}
+            <div className="mb-8 py-4">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold mb-2">Publicitários</h3>
+                <div className="h-0.5 bg-border w-full" />
+              </div>
+              <VideoAdBanner variant="grid" />
+            </div>
+
+            {/* More Videos */}
+            {sortedVideos.length > 12 && (
+              <div>
+                <h2 className="text-xl font-bold mb-4">Mais vídeos</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {sortedVideos.slice(12).map((video) => (
+                    <Link
+                      key={video.id}
+                      href={`/tv/watch/${video.id}`}
+                      className="group"
+                    >
+                      <div className="space-y-2">
+                        <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-muted">
+                          <Image
+                            src={video.thumbnailUrl}
+                            alt={video.title}
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Play className="h-6 w-6 text-black ml-1" fill="currentColor" />
+                            </div>
+                          </div>
+                          <div className="absolute bottom-2 right-2">
+                            <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white font-medium flex items-center gap-1">
+                              <Play className="h-3 w-3" />
+                              {video.duration}
+                            </div>
+                          </div>
+                          <div className="absolute top-2 left-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {video.category}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                            {video.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {video.views?.toLocaleString() || 0}
+                            </span>
+                            <span>•</span>
+                            <span className="font-medium">{video.source}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Banner Ad */}
+            <div>
+              <AdBanner variant="horizontal" size="large" />
             </div>
           </TabsContent>
 
@@ -241,55 +332,69 @@ export default function IspiAITV() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {likedVideos.map((video) => (
-                  <Link
-                    key={video.id}
-                    href={`/tv/watch/${video.id}`}
-                    className="group"
-                  >
-                    <div className="space-y-2">
-                      <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-muted">
-                        <Image
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          fill
-                          className="object-cover transition-transform group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="h-6 w-6 text-black ml-1" fill="currentColor" />
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div className="lg:col-span-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {likedVideos.map((video) => (
+                        <Link
+                          key={video.id}
+                          href={`/tv/watch/${video.id}`}
+                          className="group"
+                        >
+                          <div className="space-y-2">
+                            <div className="relative aspect-[9/16] rounded-lg overflow-hidden bg-muted">
+                              <Image
+                                src={video.thumbnailUrl}
+                                alt={video.title}
+                                fill
+                                className="object-cover transition-transform group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Play className="h-6 w-6 text-black ml-1" fill="currentColor" />
+                                </div>
+                              </div>
+                              <div className="absolute bottom-2 right-2">
+                                <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white font-medium flex items-center gap-1">
+                                  <Play className="h-3 w-3" />
+                                  {video.duration}
+                                </div>
+                              </div>
+                              <div className="absolute top-2 left-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  {video.category}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                                {video.title}
+                              </h3>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Eye className="h-3 w-3" />
+                                  {video.views?.toLocaleString() || 0}
+                                </span>
+                                <span>•</span>
+                                <span className="font-medium">{video.source}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="absolute bottom-2 right-2">
-                          <div className="bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded text-xs text-white font-medium flex items-center gap-1">
-                            <Play className="h-3 w-3" />
-                            {video.duration}
-                          </div>
-                        </div>
-                        <div className="absolute top-2 left-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {video.category}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Eye className="h-3 w-3" />
-                            {video.views?.toLocaleString() || 0}
-                          </span>
-                          <span>•</span>
-                          <span className="font-medium">{video.source}</span>
-                        </div>
-                      </div>
+                        </Link>
+                      ))}
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  </div>
+                  <div className="lg:col-span-1">
+                    <div className="sticky top-4">
+                      <AdBanner variant="vertical" size="large" label="Patrocinado" />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-8">
+                  <AdBanner variant="horizontal" size="medium" />
+                </div>
+              </>
             )}
           </TabsContent>
         </Tabs>
