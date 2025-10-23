@@ -23,6 +23,8 @@ import {
   Settings,
   MessageSquare,
   Tv,
+  Home,
+  Info,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import SidebarAssistant from "./SidebarAssistant";
@@ -257,6 +259,30 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {/* Home button */}
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
+            </Link>
+
+            {/* Sobre button */}
+            <Link href="/sobre">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+              >
+                <Info className="h-4 w-4" />
+                <span className="hidden sm:inline">Sobre</span>
+              </Button>
+            </Link>
+
             {/* IspiAI Shorts button */}
             <Link href="/shorts">
               <Button
