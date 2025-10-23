@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import NewsHeader from "@/components/NewsHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -64,7 +65,7 @@ export default function IspiAITV() {
     if (sortBy === "popular") {
       return (b.views || 0) - (a.views || 0);
     } else if (sortBy === "oldest") {
-      return new Date(a.publishedAt || a.createdAt).getTime() - new Date(b.publishedAt || b.createdAt).getTime();
+      return new Date(a.publishedAt || a.createdAt).getTime() - new Date(a.publishedAt || b.createdAt).getTime();
     }
     return new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
   });
@@ -84,7 +85,15 @@ export default function IspiAITV() {
 
   return (
     <div className="min-h-screen bg-background">
+      <NewsHeader articles={[]} />
+      
       <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Page Title */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">IspiAI TV</h1>
+          <p className="text-muted-foreground">Assista aos melhores vídeos e reportagens</p>
+        </div>
+
         <Tabs defaultValue="videos" className="w-full">
           <div className="flex items-center justify-between mb-6">
             <TabsList className="bg-muted">
