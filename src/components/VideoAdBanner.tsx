@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import Image from "next/image";
+import { getYouTubeVideoInfo } from "@/lib/youtube-utils";
 
 interface VideoAdBannerProps {
   label?: string;
@@ -47,23 +48,6 @@ const videoAds = [
   },
 ];
 
-// Extract YouTube video ID from URL
-function getYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  
-  return null;
-}
-
 export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "carousel" }: VideoAdBannerProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedVideo, setSelectedVideo] = useState<typeof videoAds[0] | null>(null);
@@ -81,7 +65,7 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
   };
 
   const handleVideoClick = (ad: typeof videoAds[0]) => {
-    const videoId = getYouTubeVideoId(ad.youtubeUrl);
+    const videoId = getYouTubeVideoInfo(ad.youtubeUrl)?.videoId;
     
     if (!videoId) {
       toast.error("URL do vídeo inválida");
@@ -161,18 +145,19 @@ export const VideoAdBanner = ({ label = "Publicidade em Vídeo", variant = "caro
                 <X className="w-5 h-5" />
               </Button>
               {selectedVideo && (() => {
-                const videoId = getYouTubeVideoId(selectedVideo.youtubeUrl);
-                const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : null;
+                const videoId = getYouTubeVideoInfo(selectedVideo.youtubeUrl)?.videoId;
+                const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://ispiai.com'}&enablejsapi=1` : null;
                 
-                return embedUrl ? (
-                  <iframe
-                    src={embedUrl}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={selectedVideo.title}
-                  />
-                ) : (
+                 return embedUrl ? (
+                   <iframe
+                     src={embedUrl}
+                     className="w-full h-full"
+                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                     allowFullScreen
+                     title={selectedVideo.title}
+                     referrerPolicy="strict-origin-when-cross-origin"
+                   />
+                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
                     URL do vídeo inválido
                   </div>

@@ -82,6 +82,7 @@ export function PoderesSection() {
                 src={mainStory.image}
                 alt={mainStory.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </div>
@@ -106,6 +107,7 @@ export function PoderesSection() {
                     src={news.image}
                     alt={news.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -124,7 +126,7 @@ export function PoderesSection() {
         <div className="lg:col-span-4">
           <div className="bg-gradient-to-br from-[#0C4A6E] to-[#075985] rounded-lg p-6 sticky top-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold text-lg">VEJA BEM</h3>
+              <h3 className="text-white font-bold text-lg">ULTIMAS</h3>
               <Link href="/veja-bem" className="text-white text-xs hover:underline">
                 VER MAIS
               </Link>

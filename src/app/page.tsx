@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from "react";
 import NewsHeader from "@/components/NewsHeader";
-import CategoryFilter from "@/components/CategoryFilter";
 import NewsCard from "@/components/NewsCard";
 import { AdBanner } from "@/components/AdBanner";
 import { VideoAdBanner } from "@/components/VideoAdBanner";
@@ -15,12 +14,18 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Link2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import ActiveFilters from "@/components/ActiveFilters";
 import { useCopilotNews } from "@/hooks/useCopilotNews";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("for-you");
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filtros avançados
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   
   // Fetch articles from API
   useEffect(() => {
@@ -40,6 +45,31 @@ export default function Home() {
 
     fetchArticles();
   }, []);
+
+  // Funções para gerenciar filtros
+  const handleApplyFilters = () => {
+    // Aqui você pode implementar a lógica para filtrar os artigos
+    // Por enquanto, apenas recarrega os artigos com os filtros aplicados
+    console.log("Aplicando filtros:", { selectedTopics, selectedStates, selectedCities });
+  };
+
+  const handleRemoveTopic = (topic: string) => {
+    setSelectedTopics(prev => prev.filter(t => t !== topic));
+  };
+
+  const handleRemoveState = (state: string) => {
+    setSelectedStates(prev => prev.filter(s => s !== state));
+  };
+
+  const handleRemoveCity = (city: string) => {
+    setSelectedCities(prev => prev.filter(c => c !== city));
+  };
+
+  const handleClearAllFilters = () => {
+    setSelectedTopics([]);
+    setSelectedStates([]);
+    setSelectedCities([]);
+  };
 
   // Transform articles to match component format
   const transformedArticles = articles.map(article => ({
@@ -96,8 +126,36 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background overflow-y-auto">
-      <NewsHeader articles={transformedArticles} />
-      <CategoryFilter onCategoryChange={setSelectedCategory} />
+      <NewsHeader 
+        articles={transformedArticles}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedTopics={selectedTopics}
+        selectedStates={selectedStates}
+        selectedCities={selectedCities}
+        onTopicsChange={setSelectedTopics}
+        onStatesChange={setSelectedStates}
+        onCitiesChange={setSelectedCities}
+        onApplyFilters={handleApplyFilters}
+      />
+      
+      {/* Spacer for fixed header */}
+      <div className="h-20"></div>
+      
+      {/* Filtros Ativos */}
+      <div className="container mx-auto px-4 max-w-7xl pt-4">
+        {(selectedTopics.length > 0 || selectedStates.length > 0 || selectedCities.length > 0) && (
+          <ActiveFilters
+            selectedTopics={selectedTopics}
+            selectedStates={selectedStates}
+            selectedCities={selectedCities}
+            onRemoveTopic={handleRemoveTopic}
+            onRemoveState={handleRemoveState}
+            onRemoveCity={handleRemoveCity}
+            onClearAll={handleClearAllFilters}
+          />
+        )}
+      </div>
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Top Banner Ad */}
@@ -146,6 +204,7 @@ export default function Home() {
                         src={article.image}
                         alt={article.title}
                         fill
+                        sizes="96px"
                         className="object-cover"
                       />
                     </div>
@@ -260,6 +319,7 @@ export default function Home() {
                   width={120}
                   height={30}
                   className="h-8 w-auto object-contain dark:hidden"
+                  style={{ width: "auto", height: "auto" }}
                 />
                 <Image
                   src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/render/image/public/document-uploads/ISPIAI_branco-4x-1761167472564.png"
@@ -267,6 +327,7 @@ export default function Home() {
                   width={120}
                   height={30}
                   className="h-8 w-auto object-contain hidden dark:block"
+                  style={{ width: "auto", height: "auto" }}
                 />
               </div>
               <p className="text-sm text-muted-foreground">

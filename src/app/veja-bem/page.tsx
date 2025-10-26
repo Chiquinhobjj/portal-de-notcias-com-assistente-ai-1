@@ -25,7 +25,7 @@ export default function VejaBemPage() {
         <div className="grid lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
             <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] bg-clip-text text-transparent">
-              Veja Bem
+              Ultimas
             </h1>
             
             <p className="text-lg text-muted-foreground mb-8">

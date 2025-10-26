@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import AdminLayout from "@/components/admin/AdminLayout";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +19,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Save, ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
 interface Category {
@@ -120,26 +121,33 @@ export default function NewArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Novo Artigo</h1>
-              <p className="text-sm text-muted-foreground">Criar novo conteúdo</p>
-            </div>
-            <Link href="/admin/articles">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Button>
-            </Link>
+    <AdminLayout
+      title="Novo Artigo"
+      breadcrumbs={[
+        { label: "Admin", href: "/admin" },
+        { label: "Artigos", href: "/admin/articles" },
+        { label: "Novo" },
+      ]}
+    >
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Novo Artigo</h1>
+            <p className="text-muted-foreground">
+              Criar novo conteúdo para o site
+            </p>
           </div>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="max-w-4xl">
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6">
             {/* Basic Info */}
@@ -187,13 +195,10 @@ export default function NewArticlePage() {
 
                 <div>
                   <Label htmlFor="content">Conteúdo *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Conteúdo completo do artigo"
-                    rows={15}
-                    required
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) => setFormData({ ...formData, content })}
+                    placeholder="Digite o conteúdo completo do artigo..."
                   />
                 </div>
               </CardContent>
@@ -315,11 +320,9 @@ export default function NewArticlePage() {
 
             {/* Actions */}
             <div className="flex justify-end gap-4">
-              <Link href="/admin/articles">
-                <Button type="button" variant="outline">
-                  Cancelar
-                </Button>
-              </Link>
+              <Button type="button" variant="outline" onClick={() => router.back()}>
+                Cancelar
+              </Button>
               <Button type="submit" disabled={loading}>
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? "Salvando..." : "Criar Artigo"}
@@ -327,7 +330,8 @@ export default function NewArticlePage() {
             </div>
           </div>
         </form>
-      </main>
-    </div>
+        </div>
+      </div>
+    </AdminLayout>
   );
 }

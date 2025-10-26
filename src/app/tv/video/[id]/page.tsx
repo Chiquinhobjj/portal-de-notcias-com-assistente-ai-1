@@ -8,6 +8,7 @@ import { ArrowLeft, Eye, ThumbsUp, Share2, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
+import { getYouTubeVideoInfo } from "@/lib/youtube-utils";
 
 interface Video {
   id: number;
@@ -22,23 +23,6 @@ interface Video {
   source: string;
   publishedAt: string;
   createdAt: string;
-}
-
-// Extract YouTube video ID from URL
-function getYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  
-  return null;
 }
 
 export default function VideoPage() {
@@ -123,8 +107,8 @@ export default function VideoPage() {
     return null;
   }
 
-  const videoId = getYouTubeVideoId(video.youtubeUrl);
-  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&controls=1` : null;
+  const videoId = getYouTubeVideoInfo(video.youtubeUrl)?.videoId;
+  const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&controls=1&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://ispiai.com'}&enablejsapi=1` : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -145,15 +129,16 @@ export default function VideoPage() {
           <div className="lg:col-span-2 space-y-4">
             {/* Video Player */}
             <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
-              {embedUrl ? (
-                <iframe
-                  src={embedUrl}
-                  className="absolute inset-0 w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={video.title}
-                />
-              ) : (
+                     {embedUrl ? (
+                       <iframe
+                         src={embedUrl}
+                         className="absolute inset-0 w-full h-full"
+                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                         allowFullScreen
+                         title={video.title}
+                         referrerPolicy="strict-origin-when-cross-origin"
+                       />
+                     ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-white">URL do vídeo inválido</p>
                 </div>
@@ -219,7 +204,7 @@ export default function VideoPage() {
               {relatedVideos.map((relatedVideo) => (
                 <Link
                   key={relatedVideo.id}
-                  href={`/tv/video/${relatedVideo.id}`}
+                  href={`/tv/reels/${relatedVideo.id}`}
                   className="group flex gap-2 hover:bg-muted/50 rounded-lg p-2 transition-colors"
                 >
                   <div className="relative w-40 aspect-video rounded overflow-hidden flex-shrink-0 bg-muted">
@@ -227,6 +212,7 @@ export default function VideoPage() {
                       src={relatedVideo.thumbnailUrl}
                       alt={relatedVideo.title}
                       fill
+                      sizes="160px"
                       className="object-cover transition-transform group-hover:scale-105"
                     />
                     <div className="absolute bottom-1 right-1">

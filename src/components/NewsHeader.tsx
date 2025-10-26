@@ -25,9 +25,17 @@ import {
   Tv,
   Home,
   Info,
+  Cpu,
+  Trophy,
+  Film,
+  Newspaper,
+  Sparkles,
+  Star,
+  Filter,
+  Menu,
+  ChevronDown,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import SidebarAssistant from "./SidebarAssistant";
 import { UserPreferences } from "./UserPreferences";
 import Image from "next/image";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -42,6 +50,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import FilterModal from "./FilterModal";
 
 const rotatingData = [
   {
@@ -160,6 +169,16 @@ const rotatingData = [
   },
 ];
 
+const categories = [
+  { id: "for-you", label: "Para Você", icon: Sparkles, color: "default" },
+  { id: "top", label: "Top", icon: Star, color: "default" },
+  { id: "all", label: "Tópicos", icon: Newspaper, color: "default" },
+  { id: "tech", label: "Tecnologia & Ciência", icon: Cpu, color: "blue" },
+  { id: "finance", label: "Finanças", icon: DollarSign, color: "green" },
+  { id: "sports", label: "Esportes", icon: Trophy, color: "orange" },
+  { id: "entertainment", label: "Entretenimento", icon: Film, color: "purple" },
+];
+
 interface NewsHeaderProps {
   articles?: Array<{
     id: string;
@@ -171,17 +190,37 @@ interface NewsHeaderProps {
     timestamp: string;
     sources: number;
   }>;
+  selectedCategory?: string;
+  onCategoryChange?: (category: string) => void;
+  selectedTopics?: string[];
+  selectedStates?: string[];
+  selectedCities?: string[];
+  onTopicsChange?: (topics: string[]) => void;
+  onStatesChange?: (states: string[]) => void;
+  onCitiesChange?: (cities: string[]) => void;
+  onApplyFilters?: () => void;
 }
 
-export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
+export default function NewsHeader({ 
+  articles = [], 
+  selectedCategory = "for-you",
+  onCategoryChange,
+  selectedTopics = [],
+  selectedStates = [],
+  selectedCities = [],
+  onTopicsChange,
+  onStatesChange,
+  onCitiesChange,
+  onApplyFilters
+}: NewsHeaderProps) {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -219,6 +258,20 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
     }
   };
 
+  const handleOpenCopilot = () => {
+    // Simula o clique no botão nativo do CopilotKit
+    const copilotButton = document.querySelector('.copilotKitButton') as HTMLButtonElement;
+    if (copilotButton) {
+      copilotButton.click();
+    }
+  };
+
+  const handleCategorySelect = (categoryId: string) => {
+    onCategoryChange?.(categoryId);
+    // Smooth scroll to top after category change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const getUserInitials = (name: string) => {
     return name
       .split(" ")
@@ -231,7 +284,7 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
   const currentData = rotatingData[currentDataIndex];
 
   return (
-    <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+    <header className="border-b bg-card/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
@@ -257,60 +310,84 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
             )}
           </Link>
 
-          {/* Actions */}
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+            {/* Categories Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <Newspaper className="h-4 w-4" />
+                  Categorias
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                <DropdownMenuLabel>Categorias de Notícias</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {categories.map((category) => {
+                  const Icon = category.icon;
+                  const isSelected = selectedCategory === category.id;
+                  
+                  return (
+                    <DropdownMenuItem
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={isSelected ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      {category.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <div className="p-2">
+                    <FilterModal
+                      selectedTopics={selectedTopics}
+                      selectedStates={selectedStates}
+                      selectedCities={selectedCities}
+                      onTopicsChange={onTopicsChange || (() => {})}
+                      onStatesChange={onStatesChange || (() => {})}
+                      onCitiesChange={onCitiesChange || (() => {})}
+                      onApplyFilters={onApplyFilters || (() => {})}
+                    />
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Quick Access Links */}
+            <div className="flex items-center gap-2">
+              <Link href="/sobre">
+                <Button variant="ghost" size="sm">
+                  <Info className="h-4 w-4 mr-2" />
+                  Sobre
+                </Button>
+              </Link>
+              
+              <Link href="/shorts">
+                <Button variant="outline" size="sm">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Shorts
+                </Button>
+              </Link>
+              
+              <Link href="/tv">
+                <Button variant="outline" size="sm">
+                  <Tv className="h-4 w-4 mr-2" />
+                  TV
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Actions */}
           <div className="flex items-center gap-2">
-            {/* Home button */}
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2"
-              >
-                <Home className="h-4 w-4" />
-                <span className="hidden sm:inline">Home</span>
-              </Button>
-            </Link>
-
-            {/* Sobre button */}
-            <Link href="/sobre">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2"
-              >
-                <Info className="h-4 w-4" />
-                <span className="hidden sm:inline">Sobre</span>
-              </Button>
-            </Link>
-
-            {/* IspiAI Shorts button */}
-            <Link href="/shorts">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">IspiAI shorts</span>
-              </Button>
-            </Link>
-
-            {/* IspiAI TV button */}
-            <Link href="/tv">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <Tv className="h-4 w-4" />
-                <span className="hidden sm:inline">IspiAI TV</span>
-              </Button>
-            </Link>
-
+            {/* XomanoAI */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setAssistantOpen(true)}
+              onClick={handleOpenCopilot}
               className="gap-2"
             >
               <MessageSquare className="h-4 w-4" />
@@ -336,6 +413,7 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
               </Button>
             )}
 
+            {/* User Menu */}
             {session?.user ? (
               <>
                 <Link href="/admin">
@@ -382,16 +460,154 @@ export default function NewsHeader({ articles = [] }: NewsHeaderProps) {
                 </Link>
               </>
             )}
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Assistant Sidebar */}
-      <SidebarAssistant 
-        open={assistantOpen} 
-        onOpenChange={setAssistantOpen}
-        onFastNewsOpen={() => router.push("/shorts")}
-      />
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t py-4 space-y-2 mt-3">
+            {/* Mobile Categories */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">Categorias</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {categories.map((category) => {
+                  const Icon = category.icon;
+                  const isSelected = selectedCategory === category.id;
+                  
+                  return (
+                    <Button
+                      key={category.id}
+                      variant={isSelected ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={`justify-start ${
+                        isSelected 
+                          ? "bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] text-white" 
+                          : ""
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      {category.label}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              {/* Mobile Filters */}
+              <div className="pt-2">
+                <FilterModal
+                  selectedTopics={selectedTopics}
+                  selectedStates={selectedStates}
+                  selectedCities={selectedCities}
+                  onTopicsChange={onTopicsChange || (() => {})}
+                  onStatesChange={onStatesChange || (() => {})}
+                  onCitiesChange={onCitiesChange || (() => {})}
+                  onApplyFilters={onApplyFilters || (() => {})}
+                />
+              </div>
+            </div>
+
+            {/* Mobile Actions */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">Navegação</h3>
+              <div className="flex flex-col gap-2">
+                <Link href="/">
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                    <Home className="h-4 w-4" />
+                    Home
+                  </Button>
+                </Link>
+                <Link href="/sobre">
+                  <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
+                    <Info className="h-4 w-4" />
+                    Sobre
+                  </Button>
+                </Link>
+                <Link href="/shorts">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                    <Zap className="h-4 w-4" />
+                    IspiAI Shorts
+                  </Button>
+                </Link>
+                <Link href="/tv">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                    <Tv className="h-4 w-4" />
+                    IspiAI TV
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenCopilot}
+                  className="w-full justify-start gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  XomanoAI
+                </Button>
+                {mounted && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="w-full justify-start gap-2"
+                  >
+                    {theme === "dark" ? (
+                      <Sun className="h-4 w-4" />
+                    ) : (
+                      <Moon className="h-4 w-4" />
+                    )}
+                    {theme === "dark" ? "Light" : "Dark"}
+                  </Button>
+                )}
+                {session?.user ? (
+                  <>
+                    <Link href="/admin">
+                      <Button variant="outline" size="sm" className="w-full justify-start gap-2">
+                        <Settings className="h-4 w-4" />
+                        Admin
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSignOut}
+                      disabled={isLoggingOut}
+                      className="w-full justify-start gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sair
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Entrar
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="sm" className="w-full bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E]">
+                        Criar Conta
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   );
 }

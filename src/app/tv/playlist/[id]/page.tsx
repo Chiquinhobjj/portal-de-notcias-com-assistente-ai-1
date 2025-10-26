@@ -119,6 +119,7 @@ export default function PlaylistPage() {
                 src={playlist.thumbnailUrl}
                 alt={playlist.title}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -135,7 +136,7 @@ export default function PlaylistPage() {
 
             <div className="flex items-center gap-4 mb-6">
               <Button size="lg" className="gap-2" asChild>
-                <Link href={videos[0] ? `/tv/watch/${videos[0].id}` : "#"}>
+                <Link href={videos[0] ? `/tv/reels/${videos[0].id}` : "#"}>
                   <Play className="h-5 w-5" fill="currentColor" />
                   Reproduzir tudo
                 </Link>
@@ -172,7 +173,7 @@ export default function PlaylistPage() {
                 {videos.map((video, index) => (
                   <Link
                     key={video.id}
-                    href={`/tv/watch/${video.id}`}
+                    href={`/tv/reels/${video.id}`}
                     className="group flex gap-4 bg-card rounded-lg border hover:border-primary/50 transition-all overflow-hidden"
                   >
                     <div className="flex-shrink-0 w-12 flex items-center justify-center bg-muted text-muted-foreground font-semibold">
@@ -184,6 +185,7 @@ export default function PlaylistPage() {
                         src={video.thumbnailUrl}
                         alt={video.title}
                         fill
+                        sizes="160px"
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">

@@ -7,7 +7,7 @@ import { VideoAdBanner } from "@/components/VideoAdBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Play, Clock, Eye, ThumbsUp, Share2, ChevronRight } from "lucide-react";
+import { Play, Clock, Eye, ThumbsUp, Share2, ChevronRight, Smartphone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -92,8 +92,20 @@ export default function IspiAITV() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Page Title */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">IspiAI TV</h1>
-          <p className="text-muted-foreground">Assista aos melhores vídeos e reportagens</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">IspiAI TV</h1>
+              <p className="text-muted-foreground">Assista aos melhores vídeos e reportagens</p>
+            </div>
+            {videos.length > 0 && (
+              <Link href={`/tv/reels/${videos[0].id}`}>
+                <Button className="bg-gradient-to-r from-[#0EA5E9] to-[#0C4A6E] hover:from-[#0C4A6E] hover:to-[#0EA5E9] text-white">
+                  <Smartphone className="w-4 h-4 mr-2" />
+                  Ver em modo Reels
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Top Banner Ad */}
@@ -159,6 +171,7 @@ export default function IspiAITV() {
                           src={playlist.thumbnailUrl}
                           alt={playlist.title}
                           fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="object-cover transition-transform group-hover:scale-105"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -197,7 +210,7 @@ export default function IspiAITV() {
                     {sortedVideos.slice(0, 12).map((video) => (
                       <Link
                         key={video.id}
-                        href={`/tv/watch/${video.id}`}
+                        href={`/tv/reels/${video.id}`}
                         className="group"
                       >
                         <div className="space-y-2">
@@ -206,6 +219,7 @@ export default function IspiAITV() {
                               src={video.thumbnailUrl}
                               alt={video.title}
                               fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               className="object-cover transition-transform group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -268,7 +282,7 @@ export default function IspiAITV() {
                   {sortedVideos.slice(12).map((video) => (
                     <Link
                       key={video.id}
-                      href={`/tv/watch/${video.id}`}
+                      href={`/tv/reels/${video.id}`}
                       className="group"
                     >
                       <div className="space-y-2">
@@ -277,6 +291,7 @@ export default function IspiAITV() {
                             src={video.thumbnailUrl}
                             alt={video.title}
                             fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-cover transition-transform group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -339,7 +354,7 @@ export default function IspiAITV() {
                       {likedVideos.map((video) => (
                         <Link
                           key={video.id}
-                          href={`/tv/watch/${video.id}`}
+                          href={`/tv/reels/${video.id}`}
                           className="group"
                         >
                           <div className="space-y-2">
@@ -348,6 +363,7 @@ export default function IspiAITV() {
                                 src={video.thumbnailUrl}
                                 alt={video.title}
                                 fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform group-hover:scale-105"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">

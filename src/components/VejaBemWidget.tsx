@@ -49,7 +49,7 @@ export function VejaBemWidget() {
       {/* Header */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xl font-bold text-white">VEJA BEM</h2>
+          <h2 className="text-xl font-bold text-white">ULTIMAS</h2>
           <Link 
             href="/veja-bem" 
             className="text-xs text-white/80 hover:text-white transition-colors flex items-center gap-1"

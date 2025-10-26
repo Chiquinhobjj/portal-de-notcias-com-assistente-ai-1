@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../styles/reels.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { CopilotProvider } from "@/providers/copilot-provider";
 import { Toaster } from "@/components/ui/sonner";

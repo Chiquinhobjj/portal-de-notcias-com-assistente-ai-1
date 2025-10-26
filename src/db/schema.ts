@@ -132,7 +132,6 @@ export const videos = sqliteTable('videos', {
   description: text('description').notNull(),
   youtubeUrl: text('youtube_url').notNull(),
   thumbnailUrl: text('thumbnail_url').notNull(),
-  category: text('category').notNull(),
   duration: text('duration').notNull(),
   views: integer('views').default(0),
   likes: integer('likes').default(0),
@@ -140,6 +139,14 @@ export const videos = sqliteTable('videos', {
   publishedAt: text('published_at'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
+});
+
+// Tabela de relacionamento many-to-many entre vídeos e categorias
+export const videoCategories = sqliteTable('video_categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  videoId: integer('video_id').notNull().references(() => videos.id, { onDelete: 'cascade' }),
+  categoryId: integer('category_id').notNull().references(() => categories.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').notNull(),
 });
 
 export const playlists = sqliteTable('playlists', {
@@ -158,4 +165,16 @@ export const playlistVideos = sqliteTable('playlist_videos', {
   videoId: integer('video_id').notNull().references(() => videos.id, { onDelete: 'cascade' }),
   position: integer('position').notNull(),
   createdAt: text('created_at').notNull(),
+});
+
+// Media gallery table
+export const media = sqliteTable('media', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  url: text('url').notNull(),
+  type: text('type').notNull(), // 'image' or 'video'
+  size: integer('size'), // file size in bytes
+  uploadedBy: text('uploaded_by').notNull().references(() => user.id),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
 });

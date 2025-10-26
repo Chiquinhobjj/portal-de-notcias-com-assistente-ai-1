@@ -14,6 +14,7 @@ import {
   VolumeX
 } from "lucide-react";
 import { toast } from "sonner";
+import { getYouTubeVideoInfo } from "@/lib/youtube-utils";
 import Image from "next/image";
 
 interface Video {
@@ -29,23 +30,6 @@ interface Video {
   source: string;
   publishedAt: string;
   createdAt: string;
-}
-
-// Extract YouTube video ID from URL
-function getYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /^([a-zA-Z0-9_-]{11})$/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  
-  return null;
 }
 
 export default function WatchPage() {
@@ -124,29 +108,30 @@ export default function WatchPage() {
     return null;
   }
 
-  const videoId = getYouTubeVideoId(currentVideo.youtubeUrl);
+  const videoId = getYouTubeVideoInfo(currentVideo.youtubeUrl)?.videoId;
   const embedUrl = videoId 
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=1`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1&controls=1&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://ispiai.com'}&enablejsapi=1`
     : null;
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden">
       {/* Video Container */}
       <div className="absolute inset-0 flex items-center justify-center">
-        {embedUrl ? (
-          <iframe
-            key={currentVideo.id}
-            src={embedUrl}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={currentVideo.title}
-            style={{
-              border: "none",
-              objectFit: "cover"
-            }}
-          />
-        ) : (
+         {embedUrl ? (
+           <iframe
+             key={currentVideo.id}
+             src={embedUrl}
+             className="w-full h-full"
+             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+             allowFullScreen
+             title={currentVideo.title}
+             referrerPolicy="strict-origin-when-cross-origin"
+             style={{
+               border: "none",
+               objectFit: "cover"
+             }}
+           />
+         ) : (
           <div className="flex flex-col items-center justify-center gap-4">
             <p className="text-white text-lg">Vídeo não disponível</p>
             <Button

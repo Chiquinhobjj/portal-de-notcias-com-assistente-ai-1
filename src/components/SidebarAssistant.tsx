@@ -6,12 +6,24 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { MessageSquare, Send, Sparkles, RotateCcw, ThumbsUp, ThumbsDown, Zap } from "lucide-react";
+import ToolCallDisplay from "./ToolCallDisplay";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  tool_calls?: ToolCall[];
+}
+
+interface ToolCall {
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
+interface ChatResponse {
+  reply: string;
+  tool_calls?: ToolCall[];
 }
 
 interface SidebarAssistantProps {
@@ -54,18 +66,59 @@ export default function SidebarAssistant({ open, onOpenChange, onFastNewsOpen }:
     setInput("");
     setIsTyping(true);
 
-    // Simulate AG-UI protocol integration
-    // In production, this would connect to the AG-UI protocol endpoint
-    setTimeout(() => {
+    try {
+      // Prepare messages for AG-UI API (format: role + content)
+      const apiMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Add the new user message
+      apiMessages.push({
+        role: "user",
+        content: input
+      });
+
+      const response = await fetch('/api/xomano', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: apiMessages,
+          metadata: {} // Optional for now as per plan
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data: ChatResponse = await response.json();
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `Compreendi sua pergunta sobre "${input}". Baseado no protocolo AG-UI com padrão HITL (human-in-the-loop), estou processando sua solicitação e buscando as informações mais relevantes.`,
+        content: data.reply,
+        timestamp: new Date(),
+        tool_calls: data.tool_calls || []
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error calling AG-UI API:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente em alguns instantes.",
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleReset = () => {
@@ -137,6 +190,9 @@ export default function SidebarAssistant({ open, onOpenChange, onFastNewsOpen }:
                       minute: "2-digit",
                     })}
                   </span>
+                  {message.role === "assistant" && message.tool_calls && (
+                    <ToolCallDisplay tool_calls={message.tool_calls} />
+                  )}
                   {message.role === "assistant" && (
                     <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
                       <Button variant="ghost" size="sm" className="h-7 px-2">

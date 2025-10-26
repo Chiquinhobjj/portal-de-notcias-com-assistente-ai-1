@@ -271,7 +271,7 @@ export default function SobrePage() {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Seções Especiais</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Explore "Opinião", "Poderes" (política), "Veja Bem" (análises) e outras seções 
+                  Explore "Opinião", "Poderes" (política), "Ultimas" (análises) e outras seções 
                   especializadas no menu ou ao rolar a página inicial.
                 </p>
                 <Link href="/opiniao">

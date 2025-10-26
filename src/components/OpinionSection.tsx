@@ -57,6 +57,7 @@ export function OpinionSection() {
                 src={article.authorImage}
                 alt={article.author}
                 fill
+                sizes="96px"
                 className="object-cover"
               />
             </div>

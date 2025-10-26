@@ -6,6 +6,7 @@ import { X, Heart, MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { getYouTubeVideoInfo } from "@/lib/youtube-utils";
 
 interface Video {
   id: number;
@@ -39,6 +40,7 @@ export const ShortsClient = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [showPlayButton, setShowPlayButton] = useState(true);
   const feedRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -121,11 +123,22 @@ export const ShortsClient = () => {
     }
   };
 
-  // Extract YouTube video ID
-  const getYouTubeEmbedUrl = (url: string): string => {
-    const videoId = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
-    return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0` : url;
+  // Usar o utilitário centralizado para gerar URL de embed
+  const getYouTubeEmbedUrlWithParams = (url: string, isCurrentVideo: boolean = false): string => {
+    const videoInfo = getYouTubeVideoInfo(url);
+    if (!videoInfo) return url;
+    
+    // Chrome requer interação do usuário para autoplay com som
+    // Vamos usar autoplay apenas para o vídeo atual e sempre muted
+    const autoplayParam = isCurrentVideo ? '1' : '0';
+    
+    return `https://www.youtube.com/embed/${videoInfo.videoId}?autoplay=${autoplayParam}&mute=1&loop=1&playlist=${videoInfo.videoId}&controls=1&modestbranding=1&rel=0&origin=${typeof window !== 'undefined' ? window.location.origin : 'https://ispiai.com'}&enablejsapi=1&playsinline=1`;
   };
+
+  // Reset play button when changing videos
+  useEffect(() => {
+    setShowPlayButton(true);
+  }, [currentIndex]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -236,12 +249,36 @@ export const ShortsClient = () => {
             >
               {/* Video iframe */}
               <iframe
-                src={getYouTubeEmbedUrl(video.youtubeUrl)}
+                src={getYouTubeEmbedUrlWithParams(video.youtubeUrl, idx === currentIndex)}
                 className="absolute inset-0 w-full h-full"
-                allow="autoplay; encrypted-media"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                title={video.title}
+                referrerPolicy="strict-origin-when-cross-origin"
                 style={{ border: "none", objectFit: "cover" }}
               />
+
+              {/* Play Button Overlay for Chrome compatibility */}
+              {idx === currentIndex && showPlayButton && (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-10"
+                  onClick={() => {
+                    // Força o autoplay no Chrome após interação do usuário
+                    const iframe = document.querySelector(`iframe[title="${video.title}"]`) as HTMLIFrameElement;
+                    if (iframe) {
+                      const newSrc = iframe.src.replace('autoplay=0', 'autoplay=1');
+                      iframe.src = newSrc;
+                      setShowPlayButton(false); // Esconde o botão após clicar
+                    }
+                  }}
+                >
+                  <div className="w-20 h-20 rounded-full bg-red-600 flex items-center justify-center shadow-2xl hover:bg-red-700 transition-colors">
+                    <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+              )}
 
               {/* HUD */}
               <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 pointer-events-none">

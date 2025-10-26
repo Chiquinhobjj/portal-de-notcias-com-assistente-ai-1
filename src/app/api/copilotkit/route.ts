@@ -9,6 +9,7 @@ export const runtime = "edge";
 
 const serviceAdapter = new OpenAIAdapter({
   model: "gpt-4o-mini",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const copilotKit = new CopilotRuntime();

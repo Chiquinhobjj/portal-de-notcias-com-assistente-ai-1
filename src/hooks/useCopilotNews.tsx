@@ -131,12 +131,12 @@ export function useCopilotNews(articles: Article[], setSelectedCategory: (catego
   // Ferramenta: Navegar para seções especiais
   useCopilotAction({
     name: "navegarParaSecao",
-    description: "Navega para seções especiais do portal como Opinião, Poderes, Veja Bem, Polícia",
+    description: "Navega para seções especiais do portal como Opinião, Poderes, Ultimas, Polícia",
     parameters: [
       {
         name: "section",
         type: "string",
-        description: "Nome da seção: opiniao, poderes, veja-bem, policia, shorts",
+        description: "Nome da seção: opiniao, poderes, ultimas, policia, shorts",
         required: true,
       },
     ],
@@ -144,14 +144,14 @@ export function useCopilotNews(articles: Article[], setSelectedCategory: (catego
       const sectionMap: Record<string, { path: string; name: string }> = {
         opiniao: { path: "/opiniao", name: "Opinião" },
         poderes: { path: "/poderes", name: "Poderes" },
-        "veja-bem": { path: "/veja-bem", name: "Veja Bem" },
+        "ultimas": { path: "/veja-bem", name: "Ultimas" },
         policia: { path: "/policia", name: "Polícia" },
         shorts: { path: "/shorts", name: "IspiAI Shorts" },
       };
       
       const target = sectionMap[section.toLowerCase()];
       if (!target) {
-        return `❓ Desculpa, não conheço essa seção. Temos: Opinião, Poderes, Veja Bem, Polícia e Shorts!`;
+        return `❓ Desculpa, não conheço essa seção. Temos: Opinião, Poderes, Ultimas, Polícia e Shorts!`;
       }
       
       router.push(target.path);
