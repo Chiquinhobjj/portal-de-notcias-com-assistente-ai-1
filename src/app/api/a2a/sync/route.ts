@@ -320,9 +320,11 @@ export async function POST(request: NextRequest) {
 
           // Filter by updatedAt or createdAt depending on resource
           if (body.resource === 'categories') {
-            query = query.where(gte(table.createdAt, body.timestamp));
+            query = query.where(gte(table.createdAt, body.timestamp)) as typeof query;
           } else {
-            query = query.where(gte(table.updatedAt, body.timestamp));
+            // For articles and ads, use updatedAt if available, otherwise createdAt
+            const dateField = 'updatedAt' in table ? table.updatedAt : table.createdAt;
+            query = query.where(gte(dateField, body.timestamp)) as typeof query;
           }
         }
 

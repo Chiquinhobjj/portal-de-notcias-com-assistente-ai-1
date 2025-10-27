@@ -42,10 +42,10 @@ export async function GET(request: NextRequest) {
     // Build where conditions
     const conditions = [];
     
-    // Add category filter
-    if (category) {
-      conditions.push(eq(videos.category, category));
-    }
+    // Category filter removed - videos now use many-to-many relationship
+    // if (category) {
+    //   conditions.push(eq(videos.category, category));
+    // }
     
     // Add search filter (case-insensitive on title and description)
     if (search) {
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     
     // Apply where conditions
     if (conditions.length > 0) {
-      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions));
+      query = query.where(conditions.length === 1 ? conditions[0] : and(...conditions)) as typeof query;
     }
     
     // Apply sorting
@@ -70,10 +70,10 @@ export async function GET(request: NextRequest) {
         ? videos.likes 
         : videos.createdAt;
     
-    query = query.orderBy(order === 'asc' ? asc(sortColumn) : desc(sortColumn));
+    query = query.orderBy(order === 'asc' ? asc(sortColumn) : desc(sortColumn)) as typeof query;
     
     // Apply pagination
-    query = query.limit(limit).offset(offset);
+    query = query.limit(limit).offset(offset) as typeof query;
     
     // Execute query
     const results = await query;

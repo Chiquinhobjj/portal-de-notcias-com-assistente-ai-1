@@ -5,10 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const mediaId = parseInt(params.id);
+    const { id } = await context.params;
+    const mediaId = parseInt(id);
 
     const deletedMedia = await db
       .delete(media)

@@ -5,10 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const videoId = parseInt(params.id);
+    const { id } = await context.params;
+    const videoId = parseInt(id);
     
     const video = await db
       .select()
@@ -35,10 +36,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const videoId = parseInt(params.id);
+    const { id } = await context.params;
+    const videoId = parseInt(id);
     const body = await request.json();
     const {
       title,
@@ -60,9 +62,7 @@ export async function PUT(
         description,
         youtubeUrl,
         thumbnailUrl,
-        category,
         duration,
-        status,
         publishedAt,
         updatedAt: now,
       })
@@ -91,10 +91,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const videoId = parseInt(params.id);
+    const { id } = await context.params;
+    const videoId = parseInt(id);
 
     const deletedVideo = await db
       .delete(videos)

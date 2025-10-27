@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
           let query = db.select().from(articles);
           
           if (conditions.length > 0) {
-            query = query.where(and(...conditions));
+            query = query.where(and(...conditions)) as typeof query;
           }
           
           const result = await query
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
           let query = db.select().from(ads);
           
           if (conditions.length > 0) {
-            query = query.where(and(...conditions));
+            query = query.where(and(...conditions)) as typeof query;
           }
           
           const result = await query
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
           let query = db.select().from(categories);
           
           if (conditions.length > 0) {
-            query = query.where(and(...conditions));
+            query = query.where(and(...conditions)) as typeof query;
           }
           
           const result = await query.limit(queryLimit);

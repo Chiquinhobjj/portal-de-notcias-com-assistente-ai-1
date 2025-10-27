@@ -15,7 +15,7 @@ import { Clock, Link2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import ActiveFilters from "@/components/ActiveFilters";
-import { useCopilotNews } from "@/hooks/useCopilotNews";
+// import { useCopilotNews } from "@/hooks/useCopilotNews"; // Temporarily disabled
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("for-you");
@@ -83,8 +83,8 @@ export default function Home() {
     sources: Math.floor(Math.random() * 50) + 10,
   }));
 
-  // Integrate CopilotKit tools for XomanoAI
-  useCopilotNews(transformedArticles, setSelectedCategory);
+  // Integrate CopilotKit tools for XomanoAI - Temporarily disabled
+  // useCopilotNews(transformedArticles, setSelectedCategory);
 
   const heroArticle = transformedArticles[0] || null;
   const newsArticles = transformedArticles.slice(1);

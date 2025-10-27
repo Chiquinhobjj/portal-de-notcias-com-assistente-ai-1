@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     let query = db.select().from(articles);
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as typeof query;
     }
 
     // Apply sorting
@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
                        articles.createdAt;
 
     query = sortOrder === 'asc' 
-      ? query.orderBy(asc(orderColumn))
-      : query.orderBy(desc(orderColumn));
+      ? query.orderBy(asc(orderColumn)) as typeof query
+      : query.orderBy(desc(orderColumn)) as typeof query;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(articles);
     if (conditions.length > 0) {
-      countQuery = countQuery.where(and(...conditions));
+      countQuery = countQuery.where(and(...conditions)) as typeof countQuery;
     }
     const totalResult = await countQuery;
     const total = totalResult[0]?.count ?? 0;

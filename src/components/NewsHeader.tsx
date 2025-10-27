@@ -259,11 +259,8 @@ export default function NewsHeader({
   };
 
   const handleOpenCopilot = () => {
-    // Simula o clique no botão nativo do CopilotKit
-    const copilotButton = document.querySelector('.copilotKitButton') as HTMLButtonElement;
-    if (copilotButton) {
-      copilotButton.click();
-    }
+    // Temporarily disabled CopilotKit
+    alert("XomanoAI temporariamente indisponível");
   };
 
   const handleCategorySelect = (categoryId: string) => {

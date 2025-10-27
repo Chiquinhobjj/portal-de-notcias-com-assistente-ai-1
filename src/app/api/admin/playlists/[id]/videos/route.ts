@@ -112,7 +112,7 @@ export async function POST(
     // Update playlist videoCount and updatedAt
     await db.update(playlists)
       .set({
-        videoCount: playlist[0].videoCount + 1,
+        videoCount: (playlist[0]?.videoCount ?? 0) + 1,
         updatedAt: new Date().toISOString()
       })
       .where(eq(playlists.id, parsedPlaylistId));

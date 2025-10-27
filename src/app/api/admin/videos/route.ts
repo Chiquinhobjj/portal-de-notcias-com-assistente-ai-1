@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const videosWithCategories = allVideos.reduce((acc, row) => {
       const existingVideo = acc.find(v => v.id === row.id);
       if (existingVideo) {
-        if (row.categoryId && !existingVideo.categories.find(c => c.id === row.categoryId)) {
+        if (row.categoryId && !existingVideo.categories.find((c: any) => c.id === row.categoryId)) {
           existingVideo.categories.push({
             id: row.categoryId,
             name: row.categoryName
@@ -115,7 +115,6 @@ export async function POST(request: NextRequest) {
         thumbnailUrl: thumbnailUrl || "",
         duration: duration || "",
         source: "YouTube",
-        status,
         publishedAt,
         createdAt: now,
         updatedAt: now,

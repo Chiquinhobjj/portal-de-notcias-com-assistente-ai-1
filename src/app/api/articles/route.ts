@@ -40,7 +40,9 @@ export async function GET(request: NextRequest) {
         like(articles.title, `%${search}%`),
         like(articles.description, `%${search}%`)
       );
-      conditions.push(searchCondition);
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
     
     // Build the query
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
     
     // Apply all conditions
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as typeof query;
     }
     
     // Apply sorting
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
     
     query = query.orderBy(
       sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn)
-    );
+    ) as typeof query;
     
     // Apply pagination
     const results = await query.limit(limit).offset(offset);

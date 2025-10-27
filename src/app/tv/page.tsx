@@ -67,9 +67,9 @@ export default function IspiAITV() {
     if (sortBy === "popular") {
       return (b.views || 0) - (a.views || 0);
     } else if (sortBy === "oldest") {
-      return new Date(a.publishedAt || a.createdAt).getTime() - new Date(a.publishedAt || b.createdAt).getTime();
+      return new Date(a.publishedAt || "").getTime() - new Date(b.publishedAt || "").getTime();
     }
-    return new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime();
+    return new Date(b.publishedAt || "").getTime() - new Date(a.publishedAt || "").getTime();
   });
 
   const likedVideos = videos.filter((v) => v.liked);

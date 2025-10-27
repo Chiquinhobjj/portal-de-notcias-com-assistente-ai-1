@@ -1,6 +1,7 @@
 "use client";
 
-import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
+// Temporarily disabled CopilotKit to fix Vercel build issues
+// import { useCopilotAction, useCopilotReadable } from "@copilotkit/react-core";
 import { useRouter } from "next/navigation";
 
 interface Article {
@@ -15,6 +16,11 @@ interface Article {
 export function useCopilotNews(articles: Article[], setSelectedCategory: (category: string) => void) {
   const router = useRouter();
 
+  // Temporarily disabled - CopilotKit functionality
+  // All CopilotKit hooks and actions are commented out below
+  
+  // Original CopilotKit code (commented out):
+  /*
   // Disponibiliza contexto das notícias para o XomanoAI (RAG automático)
   useCopilotReadable({
     description: "Lista de notícias atualmente disponíveis no portal com títulos, descrições e categorias",
@@ -180,4 +186,5 @@ export function useCopilotNews(articles: Article[], setSelectedCategory: (catego
         `🎯 Tô de olho em tudo por aqui! 👀`;
     },
   });
+  */
 }

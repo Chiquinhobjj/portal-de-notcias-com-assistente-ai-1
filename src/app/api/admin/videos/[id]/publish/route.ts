@@ -5,10 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const videoId = parseInt(params.id);
+    const { id } = await context.params;
+    const videoId = parseInt(id);
     const body = await request.json();
     const { status } = body;
 
@@ -25,7 +26,6 @@ export async function POST(
     const updatedVideo = await db
       .update(videos)
       .set({
-        status,
         publishedAt,
         updatedAt: now,
       })

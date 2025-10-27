@@ -216,7 +216,7 @@ export default async function ArticlePage({
 
   // Split content into paragraphs and insert ads
   const contentParagraphs = article.content.split('\n\n');
-  const contentWithAds: JSX.Element[] = [];
+  const contentWithAds: React.ReactElement[] = [];
   let adIndex = 0;
 
   contentParagraphs.forEach((paragraph: string, index: number) => {

@@ -54,17 +54,18 @@ export async function GET(request: NextRequest) {
       .from(articles)
       .groupBy(articles.category);
 
-    const videosByCategory = await db
-      .select({
-        category: videos.category,
-        count: sql<number>`count(*)`,
-      })
-      .from(videos)
-      .groupBy(videos.category);
+    // Videos don't have direct category relationship anymore
+    // const videosByCategory = await db
+    //   .select({
+    //     category: videos.category,
+    //     count: sql<number>`count(*)`,
+    //   })
+    //   .from(videos)
+    //   .groupBy(videos.category);
 
-    // Combine categories
+    // Combine categories (only from articles for now)
     const categoryMap = new Map<string, number>();
-    [...articlesByCategory, ...videosByCategory].forEach(item => {
+    articlesByCategory.forEach(item => {
       const current = categoryMap.get(item.category) || 0;
       categoryMap.set(item.category, current + item.count);
     });

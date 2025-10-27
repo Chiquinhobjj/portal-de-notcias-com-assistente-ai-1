@@ -54,12 +54,11 @@ export async function GET(request: NextRequest) {
     let query = db.select().from(ads);
 
     if (filters.length > 0) {
-      query = query.where(and(...filters));
+      query = query.where(and(...filters)) as typeof query;
     }
 
-    // Apply sorting
-    const sortColumn = ads[sortField as keyof typeof ads] ?? ads.createdAt;
-    query = query.orderBy(sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn));
+    // Apply sorting - use createdAt as default
+    query = query.orderBy(sortOrder === 'asc' ? asc(ads.createdAt) : desc(ads.createdAt)) as typeof query;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);
